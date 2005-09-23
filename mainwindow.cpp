@@ -1,17 +1,24 @@
-
 //
 // start: open db, ask for dbfile if not found
-// fetch list from db, populate left list
-// select none, act as if new and untouched
+// +fetch list from db, populate left list
+// select none, act as if new and untouched OR
+// select first from list
 // 
-// click on 'new' -> store/abort current, clear new struct, clear widgets
+// click on 'new' -> store/abort current, update left list,
+//					 clear new struct, clear widgets
 // click on 'save' -> update/store current, update left list
 //					  refetch from list
 //
 // click on list -> store/abort current, fetch data, fill widgets with data
+//	+ notify msg
+//	~ validate current
+//	- store current
+//	+ fetch new
+//	+ fill widgets w/ new data
+//	- refetch list (current might be stored now as new)
 //
 // track if data from current is new or edited from list
-// currentid < 0 -> INSERT, currentid > 0 -> UPDATE
+// currentindex < 0 -> INSERT, currentindex > 0 -> UPDATE
 //
 // deal with database file like in bsap (sqlite_open never fails)
 
@@ -35,12 +42,14 @@
 const uint32 MENU_DEFMSG 	= 'M000';
 const uint32 BUT_NEW		= 'Bnew';
 const uint32 BUT_SAVE		= 'Bsav';
+const uint32 LIST_INV		= 'Linv';
+const uint32 LIST_SEL		= 'Lsel';
 const uint32 TC1			= 'TC01';
 
 BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	BRect(100, 100, 740, 580), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
 
-	this->Hide();
+//	this->Hide();
 //	config = new bydpConfig();
 
 	BView *mainView = new BView(this->Bounds(), "mainView", B_FOLLOW_ALL_SIDES, 0);
@@ -71,8 +80,9 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	r = mainView->Bounds();
 	r.right = 150-20; r.top = 20;
 	listView = new BListView(r, "listView");
-	listView->AddItem(new BStringItem("dummy"));
 	mainView->AddChild(new BScrollView("scrollView", listView, B_FOLLOW_LEFT|B_FOLLOW_TOP, 0, false, true));
+	listView->SetInvocationMessage(new BMessage(LIST_INV));
+	listView->SetSelectionMessage(new BMessage(LIST_SEL));
 
 	// tabview
 	r = mainView->Bounds();
@@ -90,15 +100,21 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	mainView->AddChild(but_save);
 
 	tabView->Select(0);
-	this->Show();
+//	this->Show();
 
 	// get memory for objects
+	idlist = NULL;
 	curdata = new kesadat();
 	newdata = new kesadat();
 	// initialize database
 	int ret = OpenDatabase();
 	if (ret < 0)
 		exit(1);
+	// initialize list
+	printf("opened database, filling\n");
+//	listView->AddItem(new BStringItem("dummy"));
+	FillIndexList();
+//	this->Show();
 }
 
 BeKESAMainWindow::~BeKESAMainWindow() {
@@ -215,6 +231,29 @@ void BeKESAMainWindow::initTab1(BTabView *tv) {
 	box->AddChild(t1cr);
 }
 
+void BeKESAMainWindow::fillDataTab1(void) {
+	printf("in filldata1\n");
+	t1miejsc->SetText(curdata->t1miejsc.String());
+	t1nazwalokalna->SetText(curdata->t1nazwalokalna.String());
+	t1gmina->SetText(curdata->t1gmina.String());
+	t1powiat->SetText(curdata->t1powiat.String());
+	t1wojewodztwo->SetText(curdata->t1wojewodztwo.String());
+	t1nrobszaru->SetText(curdata->t1nrobszaru.String());
+	t1nrinwent->SetText(curdata->t1nrinwent.String());
+	t1x->SetText(curdata->t1x.String());
+	t1y->SetText(curdata->t1y.String());
+	t1stanmiejsc->SetText(curdata->t1stanmiejsc.String());
+	t1stanobszar->SetText(curdata->t1stanobszar.String());
+	int t1 = curdata->t1zrodloinformacji;
+	t1cz->SetValue((t1 & 0x0001) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1ct->SetValue((t1 & 0x0002) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cl->SetValue((t1 & 0x0004) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cw->SetValue((t1 & 0x0008) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1ca->SetValue((t1 & 0x0010) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cp->SetValue((t1 & 0x0020) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cr->SetValue((t1 & 0x0040) ? B_CONTROL_ON : B_CONTROL_OFF);
+}
+
 void BeKESAMainWindow::valiDataTab1(void) {
 	printf("in validata1\n");
 	curdata->dirty = true;
@@ -248,6 +287,7 @@ void BeKESAMainWindow::valiDataTab1(void) {
 }
 
 void BeKESAMainWindow::MessageReceived(BMessage *Message) {
+	int i;
 	this->DisableUpdates();
 	switch (Message->what) {
 		case TC1:
@@ -255,11 +295,46 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 			valiDataTab1();
 			curdata->dump_all();
 			break;
+		case LIST_SEL:
+			printf("list selection\n");
+			i = listView->CurrentSelection(0);
+			printf("got:%i\n",i);
+			if (i>=0) {
+				printf("sel:%i,id=%i\n",i,idlist[i]);
+				ChangedSelection(idlist[i]);
+				currentindex = i;	// XXX really need to remember that?
+			} else {
+				// XXX deselection? what to do???
+			}
+			break;
+		case LIST_INV:
+			printf("list invocation\n");
+			i = listView->CurrentSelection(0);
+			printf("got:%i\n",i);
+			if (i>=0) {
+				/// XXX do smth here
+				printf("sel:%i,id=%i\n",i,idlist[i]);
+			} else {
+				// XXX deselection? what to do???
+			}
+			break;
 		default:
 			BWindow::MessageReceived(Message);
 			break;
 	}
 	this->EnableUpdates();
+}
+
+void BeKESAMainWindow::ChangedSelection(int newid) {
+	// XXX decide if current should be stored
+	if (curdata->dirty) {
+		printf("current is dirty, should be stored?\n");
+		// ask if store and store
+	}
+	// fetch and store into new data
+	printf("fetching for index=%i",newid);
+	FillCurdata(newid);
+	currentid = newid;
 }
 
 bool BeKESAMainWindow::QuitRequested() {
@@ -270,9 +345,10 @@ bool BeKESAMainWindow::QuitRequested() {
 }
 
 //--------------------
-// abstract it?
+// database stuff, abstract it?
 
 int BeKESAMainWindow::OpenDatabase(void) {
+	// XXX port BSAP solution for non-existing db
 	dbData = sqlite_open("kesa.sq2", 0666, &dbErrMsg);
 	if ((dbData==0)||(dbErrMsg!=0)) {
 		printf("database not found\n");
@@ -285,6 +361,82 @@ void BeKESAMainWindow::CloseDatabase(void) {
 	sqlite_close(dbData);
 }
 
+void BeKESAMainWindow::FillIndexList(void) {
+printf("clearing\n");
+printf("has %i items\n",(int)(listView->CountItems()));
+// XXX does it work yet?
+	// clear current list
+///	if (listView->CountItems()>0) {
+//		void *anItem;
+//		for (int i=0; (anItem=listView->ItemAt(i)); i++)
+//			delete anItem;
+//printf("makeempty\n");
+//		if (!listView->IsEmpty())
+//			listView->MakeEmpty();
+//	}
+printf("removing idlist\n");
+	delete [] idlist;
+	// select list from db
+printf("fetch\n");
+	int nRows, nCols;
+	char **result;
+	BString sqlQuery;
+
+	sqlQuery = "SELECT id, t1miejscowosc FROM karta ORDER BY id";
+	sqlite_get_table(dbData, sqlQuery.String(), &result, &nRows, &nCols, &dbErrMsg);
+printf ("got:%ix%i\n", nRows, nCols);
+	if (nRows < 1) {
+		// database is empty
+		printf("database is empty\n");
+		return;
+	}
+	idlist = new int[nRows];
+printf("iterating\n");
+	for (int i=1;i<=nRows;i++) {
+printf("add %s,%s\n", result[i*nCols+0], result[i*nCols+1]);
+		idlist[i-1] = toint(result[i*nCols+0]);
+printf("id[%i]=%i, dat=%s\n",i-1,idlist[i-1],result[i*nCols+1]);
+printf("next\n");
+		listView->AddItem(new BStringItem(result[i*nCols+1]));
+	}
+printf("done\n");
+	sqlite_free_table(result);
+}
+
+void BeKESAMainWindow::FillCurdata(int id) {
+	printf("in fillcurdata with %i\n",id);
+	int i;
+	int nRows, nCols;
+	char **result;
+	BString sqlQuery;	
+	sqlQuery = "SELECT ";
+	sqlQuery += "t1miejscowosc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo, t1nrobszaru, t1nrinwentarza, t1x, t1y, t1nrstanmiejsc, t1nrstanobszar, t1zrodloinformacji";
+	sqlQuery += " FROM karta WHERE id = ";
+	sqlQuery << id;
+	printf("sql:%s\n",sqlQuery.String());
+	sqlite_get_table(dbData, sqlQuery.String(), &result, &nRows, &nCols, &dbErrMsg);
+printf ("got:%ix%i\n", nRows, nCols);
+	// readout data
+	i = nCols;
+	curdata->t1miejsc = result[i++];
+	curdata->t1nazwalokalna = result[i++];
+	curdata->t1gmina = result[i++];
+	curdata->t1powiat = result[i++];
+	curdata->t1wojewodztwo = result[i++];
+	curdata->t1nrobszaru = result[i++];
+	curdata->t1nrinwent = result[i++];
+	curdata->t1x = result[i++];
+	curdata->t1y = result[i++];
+	curdata->t1stanmiejsc = result[i++];
+	curdata->t1stanobszar = result[i++];
+	curdata->t1zrodloinformacji = toint(result[i++]);
+
+	sqlite_free_table(result);
+	curdata->id = id;
+	curdata->dirty = false;
+	fillDataTab1();
+}
+
 //--------------------
 
 void kesadat::dump_all(void) {
@@ -295,4 +447,15 @@ void kesadat::dump_all(void) {
 		t1nrobszaru.String(), t1nrinwent.String(), t1x.String(), t1y.String(), t1stanmiejsc.String(), t1stanobszar.String());
 	printf("zrodlo: %x\n", t1zrodloinformacji);
 	printf("\n");
+}
+
+//---------------------
+
+#include <stdlib.h>
+
+int toint(const char *input) {
+	if (input != NULL)
+		return strtol(input, NULL, 10);
+	else
+		return 0;
 }

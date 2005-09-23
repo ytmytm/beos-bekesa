@@ -7,7 +7,10 @@
 	#include <sqlite.h>
 	#include "globals.h"
 
+// helper
+int toint(const char *input);
 
+// kesa data storage
 #include <String.h>
 class kesadat {
 	public:
@@ -41,10 +44,18 @@ class kesadat {
 			virtual bool QuitRequested();
 //			virtual void RefsReceived(BMessage *Message);
 		private:
+			// database handlers
 			int OpenDatabase(void);
 			void CloseDatabase(void);
+			void FillIndexList(void);
+			void FillCurdata(int id);
+			// tab handlers
 			void initTab1(BTabView *tv);
 			void valiDataTab1(void);
+			void fillDataTab1(void);
+
+			// action
+			void ChangedSelection(int newid);
 
 			// main view widgets
 			BMenuBar *menuBar;
@@ -64,7 +75,9 @@ class kesadat {
 			char *dbErrMsg;
 			// data holders
 			kesadat *curdata, *newdata;
-			int currentid;
+			int currentid;	// id of currently edited data, <0 -> INSERT
+			int currentindex;	// index on list of current data, XXX REMOVEIT?
+			int *idlist;	// ids of listView data
 	};
 
 #endif
