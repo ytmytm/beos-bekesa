@@ -12,6 +12,8 @@
 //
 // track if data from current is new or edited from list
 // currentid < 0 -> INSERT, currentid > 0 -> UPDATE
+//
+// deal with database file like in bsap (sqlite_open never fails)
 
 #include "mainwindow.h"
 #include <View.h>
@@ -93,6 +95,10 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	// get memory for objects
 	curdata = new kesadat();
 	newdata = new kesadat();
+	// initialize database
+	int ret = OpenDatabase();
+	if (ret < 0)
+		exit(1);
 }
 
 BeKESAMainWindow::~BeKESAMainWindow() {
@@ -264,8 +270,24 @@ bool BeKESAMainWindow::QuitRequested() {
 }
 
 //--------------------
+// abstract it?
 
-void kesadat::dump_all( void ) {
+int BeKESAMainWindow::OpenDatabase(void) {
+	dbData = sqlite_open("kesa.sq2", 0666, &dbErrMsg);
+	if ((dbData==0)||(dbErrMsg!=0)) {
+		printf("database not found\n");
+		return -1;
+	}
+	return 0;
+}
+
+void BeKESAMainWindow::CloseDatabase(void) {
+	sqlite_close(dbData);
+}
+
+//--------------------
+
+void kesadat::dump_all(void) {
 	printf("------------\n");
 	printf("miejsc:%s, nazwa: %s, gmina %s\npowiat: %s, wojewodz: %s\n",
 		t1miejsc.String(), t1nazwalokalna.String(), t1gmina.String(), t1powiat.String(), t1wojewodztwo.String());
