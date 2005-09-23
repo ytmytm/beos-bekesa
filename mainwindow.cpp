@@ -1,4 +1,18 @@
 
+//
+// start: open db, ask for dbfile if not found
+// fetch list from db, populate left list
+// select none, act as if new and untouched
+// 
+// click on 'new' -> store/abort current, clear new struct, clear widgets
+// click on 'save' -> update/store current, update left list
+//					  refetch from list
+//
+// click on list -> store/abort current, fetch data, fill widgets with data
+//
+// track if data from current is new or edited from list
+// currentid < 0 -> INSERT, currentid > 0 -> UPDATE
+
 #include "mainwindow.h"
 #include <View.h>
 #include <Box.h>
@@ -75,6 +89,10 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 
 	tabView->Select(0);
 	this->Show();
+
+	// get memory for objects
+	curdata = new kesadat();
+	newdata = new kesadat();
 }
 
 BeKESAMainWindow::~BeKESAMainWindow() {
@@ -191,12 +209,45 @@ void BeKESAMainWindow::initTab1(BTabView *tv) {
 	box->AddChild(t1cr);
 }
 
+void BeKESAMainWindow::valiDataTab1(void) {
+	printf("in validata1\n");
+	curdata->dirty = true;
+	curdata->t1miejsc = t1miejsc->Text();
+	curdata->t1nazwalokalna = t1nazwalokalna->Text();
+	curdata->t1gmina = t1gmina->Text();
+	curdata->t1powiat = t1powiat->Text();
+	curdata->t1wojewodztwo = t1wojewodztwo->Text();
+	curdata->t1nrobszaru = t1nrobszaru->Text();
+	curdata->t1nrinwent = t1nrinwent->Text();
+	curdata->t1x = t1x->Text();
+	curdata->t1y = t1y->Text();
+	curdata->t1stanmiejsc = t1stanmiejsc->Text();
+	curdata->t1stanobszar = t1stanobszar->Text();
+	int t1zrodlo = 0;
+	if (t1cz->Value() == B_CONTROL_ON)
+		t1zrodlo |= 0x0001;
+	if (t1ct->Value() == B_CONTROL_ON)
+		t1zrodlo |= 0x0002;
+	if (t1cl->Value() == B_CONTROL_ON)
+		t1zrodlo |= 0x0004;
+	if (t1cw->Value() == B_CONTROL_ON)
+		t1zrodlo |= 0x0008;
+	if (t1ca->Value() == B_CONTROL_ON)
+		t1zrodlo |= 0x0010;
+	if (t1cp->Value() == B_CONTROL_ON)
+		t1zrodlo |= 0x0020;
+	if (t1cr->Value() == B_CONTROL_ON)
+		t1zrodlo |= 0x0040;
+	curdata->t1zrodloinformacji = t1zrodlo;
+}
+
 void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 	this->DisableUpdates();
 	switch (Message->what) {
 		case TC1:
 			// update internal state of tab1 or mark it dirty
-			printf("change!\n");
+			valiDataTab1();
+			curdata->dump_all();
 			break;
 		default:
 			BWindow::MessageReceived(Message);
@@ -210,4 +261,16 @@ bool BeKESAMainWindow::QuitRequested() {
 //	config->save();
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	return BWindow::QuitRequested();
+}
+
+//--------------------
+
+void kesadat::dump_all( void ) {
+	printf("------------\n");
+	printf("miejsc:%s, nazwa: %s, gmina %s\npowiat: %s, wojewodz: %s\n",
+		t1miejsc.String(), t1nazwalokalna.String(), t1gmina.String(), t1powiat.String(), t1wojewodztwo.String());
+	printf("nrobsz: %s, nrinwent: %s, x: %s, y: %s, stan/msc: %s, stan/obsz: %s\n",
+		t1nrobszaru.String(), t1nrinwent.String(), t1x.String(), t1y.String(), t1stanmiejsc.String(), t1stanobszar.String());
+	printf("zrodlo: %x\n", t1zrodloinformacji);
+	printf("\n");
 }
