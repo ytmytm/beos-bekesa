@@ -1,8 +1,7 @@
 //
 // start: open db, ask for dbfile if not found
 // +fetch list from db, populate left list
-// select none, act as if new and untouched OR
-// select first from list
+// select first from list, if list empty - act as if new and untouched
 // 
 // click on 'new' -> store/abort current, update left list,
 //					 clear new struct, clear widgets
