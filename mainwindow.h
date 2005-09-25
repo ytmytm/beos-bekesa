@@ -52,6 +52,7 @@ class kesadat {
 			void FetchCurdata(int id);
 			bool CommitCurdata(bool haveCancelButton = true);	// action?
 			void DoCommitCurdata(void);
+			void DoDeleteCurdata(void);
 			int GenerateId(void);
 			// tab handlers
 			void initTabs(BTabView *tv);
@@ -72,7 +73,7 @@ class kesadat {
 			BTabView *tabView;
 
 			// bottom navigation/control
-			BButton *but_new, *but_save;
+			BButton *but_new, *but_clear, *but_restore, *but_delete, *but_save;
 			// tab1 controls
 			BTextControl *t1miejsc, *t1nazwalokalna, *t1gmina, *t1powiat, *t1wojewodztwo;
 			BTextControl *t1nrobszaru, *t1nrinwent, *t1x, *t1y, *t1stanmiejsc, *t1stanobszar;

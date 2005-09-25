@@ -2,17 +2,16 @@
 // start: open db, ask for dbfile if not found
 // deal with database file like in bsap (sqlite_open never fails)
 //
-// select first from list, if list empty - act as if new and untouched?
+// open: new or 1st from list?
 //
 // currentid < 0 -> INSERT, currentid > 0 -> UPDATE
 //
-// buttons: New, Save, Delete, Clear; 1st, last, next, prev
+// nav buttons (or menu?): 1st, last, next, prev
+//
+// order list with sth; write 2/more fields
 //
 // note: with current id generation PRIMARY KEY(id,t1miescowosc,etc.) may be back
 //       and id must not be auto_increment augumented
-// note2: real update must be done so id would be preserved if additional tables
-//        are to be used (znaleziska)
-//		  just prepare another fromat sql string and use the same sqlite_printf
 
 #include "mainwindow.h"
 #include <View.h>
@@ -31,6 +30,9 @@
 
 const uint32 MENU_DEFMSG 	= 'M000';
 const uint32 BUT_NEW		= 'Bnew';
+const uint32 BUT_CLEAR		= 'Bclr';
+const uint32 BUT_RESTORE	= 'Bres';
+const uint32 BUT_DELETE		= 'Bdel';
 const uint32 BUT_SAVE		= 'Bsav';
 const uint32 LIST_INV		= 'Linv';
 const uint32 LIST_SEL		= 'Lsel';
@@ -67,7 +69,7 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	r = mainView->Bounds();
 	r.right = 150-20; r.top = 20;
 	listView = new BListView(r, "listView");
-	mainView->AddChild(new BScrollView("scrollView", listView, B_FOLLOW_LEFT|B_FOLLOW_TOP, 0, false, true));
+	mainView->AddChild(new BScrollView("scrollView", listView, B_FOLLOW_LEFT|B_FOLLOW_TOP_BOTTOM, 0, false, true));
 	listView->SetInvocationMessage(new BMessage(LIST_INV));
 	listView->SetSelectionMessage(new BMessage(LIST_SEL));
 
@@ -82,8 +84,14 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 
 	// buttons
 	but_new = new BButton(BRect(170,440,230,470), "but_new", "Nowy", new BMessage(BUT_NEW), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
+	but_clear = new BButton(BRect(250,440,310,470), "but_clear", "Wyczyść", new BMessage(BUT_CLEAR), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
+	but_restore = new BButton(BRect(330,440,390,470), "but_restore", "Przywróć", new BMessage(BUT_RESTORE), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
+	but_delete = new BButton(BRect(410,440,470,470), "but_delete", "Usuń", new BMessage(BUT_DELETE), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
 	but_save = new BButton(BRect(570,440,630,470), "but_save", "Zapisz", new BMessage(BUT_SAVE), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM);
 	mainView->AddChild(but_new);
+	mainView->AddChild(but_clear);
+	mainView->AddChild(but_restore);
+	mainView->AddChild(but_delete);
 	mainView->AddChild(but_save);
 
 	tabView->Select(0);
@@ -98,7 +106,7 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 		exit(1);
 	// initialize list
 	RefreshIndexList();
-//	XXX act like this one is new or select the first one?
+//	XXX act like if this one is new or select the first one?
 	currentid = -1;
 }
 
@@ -112,11 +120,17 @@ void BeKESAMainWindow::initTabs(BTabView *tv) {
 
 void BeKESAMainWindow::curdataFromTabs(void) {
 	curdataFromTab1();
-	curdata->dirty = true;
 }
 
 void BeKESAMainWindow::curdata2Tabs(void) {
 	curdata2Tab1();
+	BString tmp;
+	tmp = APP_NAME;
+	tmp += ": ";
+	tmp += curdata->t1miejsc;
+	tmp += "; nr inwent.: ";
+	tmp += curdata->t1nrinwent;
+	this->SetTitle(tmp.String());
 }
 
 void BeKESAMainWindow::initTab1(BTabView *tv) {
@@ -287,9 +301,9 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 	this->DisableUpdates();
 	switch (Message->what) {
 		case TC1:
-			// update internal state of tab1 or mark it dirty
-			curdataFromTabs();
+			// mark tab1 dirty
 //			curdata->dump_all();
+			curdata->dirty = true;
 			break;
 		case BUT_NEW:
 			if (CommitCurdata()) {
@@ -300,8 +314,26 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 				curdata2Tabs();
 			}
 			break;
+		case BUT_CLEAR:
+			curdata->clear();
+			curdata->dirty = true;
+			curdata2Tabs();
+			break;
+		case BUT_RESTORE:
+			if (currentid >= 0) {
+				FetchCurdata(currentid);
+				curdata2Tabs();
+			}
+			break;
+		case BUT_DELETE:
+			DoDeleteCurdata();
+			currentid = -1;
+			curdata2Tabs();
+			break;
 		case BUT_SAVE:
+			curdataFromTabs();
 			DoCommitCurdata();
+			curdata2Tabs();
 			break;
 		case LIST_SEL:
 		case LIST_INV:
@@ -327,7 +359,7 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 }
 
 void BeKESAMainWindow::ChangedSelection(int newid) {
-	if (! CommitCurdata()) {
+	if (!(CommitCurdata())) {
 		// XXX do nothing if cancel, restore old selection?
 		return;
 	}
@@ -351,8 +383,7 @@ bool BeKESAMainWindow::QuitRequested() {
 
 // if returns false -> cancel action and resume editing current data
 bool BeKESAMainWindow::CommitCurdata(bool haveCancelButton = true) {
-	int ret;
-	if (!curdata->dirty)
+	if (!(curdata->dirty))
 		return true;
 	// ask if store
 	BAlert *ask;
@@ -360,7 +391,7 @@ bool BeKESAMainWindow::CommitCurdata(bool haveCancelButton = true) {
 		ask = new BAlert(APP_NAME, "Zapisać zmiany w aktualnej karcie?", "Tak", "Nie", "Anuluj", B_WIDTH_AS_USUAL, B_IDEA_ALERT);
 	else
 		ask = new BAlert(APP_NAME, "Zapisać zmiany w aktualnej karcie?", "Tak", "Nie", NULL, B_WIDTH_AS_USUAL, B_IDEA_ALERT);
-	ret = ask->Go();
+	int ret = ask->Go();
 	switch (ret) {
 		case 2:
 //printf("cancel\n");
@@ -372,6 +403,7 @@ bool BeKESAMainWindow::CommitCurdata(bool haveCancelButton = true) {
 		case 0:
 		default:
 //printf("commiting data\n");
+			curdataFromTabs();
 			DoCommitCurdata();
 	};
 	return true;
@@ -380,24 +412,23 @@ bool BeKESAMainWindow::CommitCurdata(bool haveCancelButton = true) {
 // insert/update curdata unconditionally
 void BeKESAMainWindow::DoCommitCurdata(void) {
 	BString sql;
-	int ret, newid;
+	int ret;
 	printf("in commit data\n");
-	// maybe a real UPDATE should be done
-	if (currentid >= 0) {
-		// remove current and fall through insert
-		ret = sqlite_exec_printf(dbData, "DELETE FROM karta WHERE id = %i", 0, 0, &dbErrMsg, currentid);
-		printf("del: %i, %s\n",ret, dbErrMsg);
+	if (currentid >= 0) {	// UPDATE
+		sql = "UPDATE karta SET ";
+		sql += "t1miejscowosc = %Q, t1nazwalokalna = %Q, t1gmina = %Q, t1powiat = %Q, t1wojewodztwo = %Q, t1nrobszaru = %Q, t1nrinwentarza = %Q, t1x = %Q, t1y = %Q, t1nrstanmiejsc = %Q, t1nrstanobszar = %Q, t1zrodloinformacji = %i";	// t1
+		sql += " WHERE id = %i";
+	} else {	// INSERT
+		int newid = GenerateId();
+		curdata->id = newid;
+		sql = "INSERT INTO karta (";
+		sql += "t1miejscowosc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo, t1nrobszaru, t1nrinwentarza, t1x, t1y, t1nrstanmiejsc, t1nrstanobszar, t1zrodloinformacji,";
+		sql += " id ) VALUES ( ";
+		sql += "%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %i,";	// t1
+		sql += " %i)";
 	}
-	newid = GenerateId();
-	curdata->id = newid;
-	// INSERT INTO karta (t1,t2..) VALUES (v1,v2..)
-	sql = "INSERT INTO karta (id, ";
-	sql += "t1miejscowosc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo, t1nrobszaru, t1nrinwentarza, t1x, t1y, t1nrstanmiejsc, t1nrstanobszar, t1zrodloinformacji";
-	sql += ") VALUES ( %i, ";
-	sql += "%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %i";	// t1
-	sql += ")";
-	printf("inssql:%s\n",sql.String());
-	ret = sqlite_exec_printf(dbData, sql.String(), 0, 0, &dbErrMsg, curdata->id,
+	printf("sql:%s\n",sql.String());
+	ret = sqlite_exec_printf(dbData, sql.String(), 0, 0, &dbErrMsg,
 		curdata->t1miejsc.String(),
 		curdata->t1nazwalokalna.String(),
 		curdata->t1gmina.String(),
@@ -409,12 +440,22 @@ void BeKESAMainWindow::DoCommitCurdata(void) {
 		curdata->t1y.String(),
 		curdata->t1stanmiejsc.String(),
 		curdata->t1stanobszar.String(),
-		curdata->t1zrodloinformacji
+		curdata->t1zrodloinformacji,
+		curdata->id
 	);
-//	printf("result: %i, %s; newid=%i\n", ret, dbErrMsg, newid);
+	printf("result: %i, %s; id=%i\n", ret, dbErrMsg, curdata->id);
 	currentid = curdata->id;
 	curdata->dirty = false;
 	RefreshIndexList();	//XXX here or later?
+}
+
+void BeKESAMainWindow::DoDeleteCurdata(void) {
+	if (currentid >= 0) {
+		int ret = sqlite_exec_printf(dbData, "DELETE FROM karta WHERE id = %i", 0, 0, &dbErrMsg, currentid);
+		printf("del: %i, %s\n",ret, dbErrMsg);
+	}
+	curdata->clear();
+	RefreshIndexList();
 }
 
 int BeKESAMainWindow::OpenDatabase(void) {
@@ -454,12 +495,12 @@ void BeKESAMainWindow::RefreshIndexList(void) {
 	if (nRows < 1) {
 		// XXX database is empty, do sth about it?
 		printf("database is empty\n");
-		return;
-	}
-	idlist = new int[nRows];
-	for (int i=1;i<=nRows;i++) {
-		idlist[i-1] = toint(result[i*nCols+0]);
-		listView->AddItem(new BStringItem(result[i*nCols+1]));
+	} else {
+		idlist = new int[nRows];
+		for (int i=1;i<=nRows;i++) {
+			idlist[i-1] = toint(result[i*nCols+0]);
+			listView->AddItem(new BStringItem(result[i*nCols+1]));
+		}
 	}
 	sqlite_free_table(result);
 }
