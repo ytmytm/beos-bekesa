@@ -1,6 +1,7 @@
 //
 // start: open db, ask for dbfile if not found
 // deal with database file like in bsap (sqlite_open never fails)
+//	(if database doesn't exist - create it with embedded schema?)
 //
 // open: new or 1st from list?
 //
