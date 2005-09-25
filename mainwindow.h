@@ -14,9 +14,10 @@ int toint(const char *input);
 #include <String.h>
 class kesadat {
 	public:
-	kesadat(void) { dirty = false; id = -1; };
+	kesadat(void) { clear(); };
 	~kesadat() { };
 	void dump_all(void);
+	void clear(void);
 	// data holders
 	bool dirty;
 	int id;
@@ -47,12 +48,19 @@ class kesadat {
 			// database handlers
 			int OpenDatabase(void);
 			void CloseDatabase(void);
-			void FillIndexList(void);
-			void FillCurdata(int id);
+			void RefreshIndexList(void);
+			void FetchCurdata(int id);
+			bool CommitCurdata(bool haveCancelButton = true);	// action?
+			void DoCommitCurdata(void);
+			int GenerateId(void);
 			// tab handlers
+			void initTabs(BTabView *tv);
+			void curdataFromTabs(void);
+			void curdata2Tabs(void);
+			// tab1
 			void initTab1(BTabView *tv);
-			void valiDataTab1(void);
-			void fillDataTab1(void);
+			void curdataFromTab1(void);
+			void curdata2Tab1(void);
 
 			// action
 			void ChangedSelection(int newid);
