@@ -81,8 +81,8 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	initTabs(tabView);
 
 	// buttons
-	but_new = new BButton(BRect(170,440,230,470), "but_new", "New", new BMessage(BUT_NEW), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
-	but_save = new BButton(BRect(570,440,630,470), "but_save", "Save", new BMessage(BUT_SAVE), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM);
+	but_new = new BButton(BRect(170,440,230,470), "but_new", "Nowy", new BMessage(BUT_NEW), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
+	but_save = new BButton(BRect(570,440,630,470), "but_save", "Zapisz", new BMessage(BUT_SAVE), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM);
 	mainView->AddChild(but_new);
 	mainView->AddChild(but_save);
 
