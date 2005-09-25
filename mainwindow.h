@@ -84,7 +84,7 @@ class kesadat {
 			// data holders
 			kesadat *curdata, *newdata;
 			int currentid;	// id of currently edited data, <0 -> INSERT
-			int currentindex;	// index on list of current data, XXX REMOVEIT?
+//			int currentindex;	// index on list of current data, XXX REMOVEIT?
 			int *idlist;	// ids of listView data
 	};
 

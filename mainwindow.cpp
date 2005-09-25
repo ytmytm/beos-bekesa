@@ -1,13 +1,18 @@
 //
 // start: open db, ask for dbfile if not found
+// deal with database file like in bsap (sqlite_open never fails)
+//
 // select first from list, if list empty - act as if new and untouched?
 //
 // currentid < 0 -> INSERT, currentid > 0 -> UPDATE
 //
-// deal with database file like in bsap (sqlite_open never fails)
-//
 // buttons: New, Save, Delete, Clear; 1st, last, next, prev
 //
+// note: with current id generation PRIMARY KEY(id,t1miescowosc,etc.) may be back
+//       and id must not be auto_increment augumented
+// note2: real update must be done so id would be preserved if additional tables
+//        are to be used (znaleziska)
+//		  just prepare another fromat sql string and use the same sqlite_printf
 
 #include "mainwindow.h"
 #include <View.h>
@@ -299,24 +304,14 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 			DoCommitCurdata();
 			break;
 		case LIST_SEL:
-			printf("list selection\n");
+		case LIST_INV:
+			printf("list selection/invoc\n");
 			i = listView->CurrentSelection(0);
 			printf("got:%i\n",i);
 			if (i>=0) {
 				printf("sel:%i,id=%i\n",i,idlist[i]);
 				ChangedSelection(idlist[i]);
-				currentindex = i;	// XXX really need to remember that?
-			} else {
-				// XXX deselection? what to do???
-			}
-			break;
-		case LIST_INV:
-			printf("list invocation\n");
-			i = listView->CurrentSelection(0);
-			printf("got:%i\n",i);
-			if (i>=0) {
-				/// XXX do smth here
-				printf("sel:%i,id=%i\n",i,idlist[i]);
+//				currentindex = i;	// XXX really need to remember that?
 			} else {
 				// XXX deselection? what to do???
 			}
