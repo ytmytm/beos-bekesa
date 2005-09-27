@@ -1,6 +1,6 @@
 
 CREATE TABLE karta (
-	id 		INTEGER PRIMARY KEY,
+	id 		INTEGER NOT NULL,
 
 	t1miejscowosc	TEXT NOT NULL,
 	t1nazwalokalna	TEXT,
@@ -8,7 +8,7 @@ CREATE TABLE karta (
 	t1powiat	TEXT,
 	t1wojewodztwo	TEXT,
 	t1nrobszaru	TEXT,
-	t1nrinwentarza	TEXT NOT NULL,
+	t1nrinwentarza	TEXT,
 	t1x		TEXT,
 	t1y		TEXT,
 	t1nrstanmiejsc	TEXT,
@@ -19,13 +19,14 @@ CREATE TABLE karta (
 	t2duzedoliny	INTEGER,
 	t2maledoliny	INTEGER,
 	t2pozadolinami	INTEGER,
----
-	t2ekspozycja	INTEGER,
-	t2ekspozycja2	INTEGER,
+
 	t2ekswys		INTEGER,
 	t2eksstop		INTEGER,
 	t2ekskier		INTEGER,
-
+	t2ekspozycja	INTEGER,
+	t2ekspozycja2	INTEGER,
+	t2forma		TEXT,
+---
 	t3zabudowa		INTEGER,
 	t3rodzaj		INTEGER,
 	t3okreslenie	TEXT,
@@ -59,8 +60,8 @@ CREATE TABLE karta (
 	t9sprawdzil		TEXT,
 
 	t10materialy	TEXT,
-	t10dalsze		TEXT
+	t10dalsze		TEXT,
 
----	PRIMARY KEY(id,t1miejscowosc)
+	PRIMARY KEY(id,t1miejscowosc)
  );
 
