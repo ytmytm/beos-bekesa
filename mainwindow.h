@@ -25,6 +25,7 @@ class kesadat {
 	BString t1miejsc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo;
 	BString t1nrobszaru, t1nrinwent, t1x, t1y, t1stanmiejsc, t1stanobszar;
 	int t1zrodloinformacji;
+	int t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami;
 };
 
 	class BButton;
@@ -60,8 +61,14 @@ class kesadat {
 			void curdata2Tabs(void);
 			// tab1
 			void initTab1(BTabView *tv);
+			void updateTab1(void);
 			void curdataFromTab1(void);
 			void curdata2Tab1(void);
+			// tab2
+			void initTab2(BTabView *tv);
+			void updateTab2(void);
+			void curdataFromTab2(void);
+			void curdata2Tab2(void);
 
 			// action
 			void ChangedSelection(int newid);
@@ -78,14 +85,18 @@ class kesadat {
 			BTextControl *t1miejsc, *t1nazwalokalna, *t1gmina, *t1powiat, *t1wojewodztwo;
 			BTextControl *t1nrobszaru, *t1nrinwent, *t1x, *t1y, *t1stanmiejsc, *t1stanobszar;
 			BCheckBox *t1cz, *t1ct, *t1cl, *t1cw, *t1ca, *t1cp, *t1cr;
+			// tab2 controls
+			BCheckBox *t2nadmorska, *t2nm, *t2np, *t2ni, *t2ns, *t2nw;
+			BCheckBox *t2duzedoliny, *t2dw, *t2dd, *t2dz, *t2dy, *t2db;
+			BCheckBox *t2maledoliny, *t2md, *t2ms, *t2mk;
+			BCheckBox *t2pozadoliny, *t2pr, *t2pf, *t2pp, *t2pg;
 
 			// database
 			sqlite *dbData;
 			char *dbErrMsg;
 			// data holders
-			kesadat *curdata, *newdata;
+			kesadat *curdata;
 			int currentid;	// id of currently edited data, <0 -> INSERT
-//			int currentindex;	// index on list of current data, XXX REMOVEIT?
 			int *idlist;	// ids of listView data
 	};
 
