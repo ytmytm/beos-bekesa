@@ -19,6 +19,7 @@ CREATE TABLE karta (
 	t2duzedoliny	INTEGER,
 	t2maledoliny	INTEGER,
 	t2pozadolinami	INTEGER,
+---
 	t2ekspozycja	INTEGER,
 	t2ekspozycja2	INTEGER,
 	t2ekswys		INTEGER,
