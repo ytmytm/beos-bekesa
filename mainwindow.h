@@ -61,6 +61,10 @@ class kesadat {
 			void initTabs(BTabView *tv);
 			void curdataFromTabs(void);
 			void curdata2Tabs(void);
+			// init - setup widgets, call update
+			// update - enable/disable widgets, parse msg (combo items)
+			// curdata2 - read data from curtab to widgets, call update
+			// curdatafrom - read from widgets to curtab
 			// tab1
 			void initTab1(BTabView *tv);
 			void updateTab1(BMessage *msg = NULL);
@@ -74,6 +78,8 @@ class kesadat {
 			// tab3
 			void initTab3(BTabView *tv);
 			void updateTab3(BMessage *msg = NULL);
+			void curdataFromTab3(void);
+			void curdata2Tab3(void);
 
 			// action
 			void ChangedSelection(int newid);
@@ -96,7 +102,7 @@ class kesadat {
 			BCheckBox *t2maledoliny, *t2md, *t2ms, *t2mk;
 			BCheckBox *t2pozadoliny, *t2pr, *t2pf, *t2pp, *t2pg;
 			// tab3 controls
-			BMenuItem *t2wysitems[7], *t2stopitems[6];
+			BMenuItem *t2wysitems[8], *t2stopitems[7];
 			BCheckBox *t2knw, *t2knn, *t2kne, *t2kww, *t2kee, *t2ksw, *t2kss, *t2kse;
 			BRadioButton *t2te, *t2to, *t2tn, *t2tb;
 			BCheckBox *t2ek, *t2es, *t2ec, *t2eg, *t2ew;
@@ -108,7 +114,7 @@ class kesadat {
 			char *dbErrMsg;
 			// data holders
 			kesadat *curdata;	// must exist BEFORE tabs are created
-			int currentid;	// id of currently edited data, <0 -> INSERT
+			int currentid;	// id of currently edited data, <0 -> INSERT >=0 -> UPDATE
 			int *idlist;	// ids of listView data
 	};
 

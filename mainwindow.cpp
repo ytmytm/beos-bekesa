@@ -5,11 +5,9 @@
 //
 // open: new or 1st from list?
 //
-// currentid < 0 -> INSERT, currentid > 0 -> UPDATE
-//
 // nav buttons (or menu?): 1st, last, next, prev
 //
-// order list with sth; write 2/more fields
+// order list with sth; write 2/more fields (nr inw, etc)
 //
 // note: with current id generation PRIMARY KEY(id,t1miescowosc,etc.) may be back
 //       and id must not be auto_increment augumented
@@ -17,7 +15,8 @@
 //						 or not... id is always different
 //
 // note: tabs functions should be exported to different files as BView derivs
-//		 (what about messages? must be passed here?)
+//		 (what about messages? must be passed here? NO - updateTab only)
+// note: rewrite combine_checkboxes as struct { size, cb_list } and common set of functions
 //
 // tabadd: init, update, cur2, curfrom, msg, kesaclear, kesadump
 //			update, insert, select
@@ -142,11 +141,13 @@ void BeKESAMainWindow::initTabs(BTabView *tv) {
 void BeKESAMainWindow::curdataFromTabs(void) {
 	curdataFromTab1();
 	curdataFromTab2();
+	curdataFromTab3();
 }
 
 void BeKESAMainWindow::curdata2Tabs(void) {
 	curdata2Tab1();
 	curdata2Tab2();
+	curdata2Tab3();
 
 	BString tmp;
 	tmp = APP_NAME;
@@ -307,8 +308,7 @@ void BeKESAMainWindow::initTab3(BTabView *tv) {
 	t2forma = new BTextControl(sl, "t2forma", "Forma szczeg.", NULL, new BMessage(TC3));
 	box->AddChild(t2forma);
 	t2forma->SetDivider(100);
-	//updateTab3();
-//	t3wysitems[7]->SetMarked(true);
+	updateTab3();
 }
 
 void BeKESAMainWindow::updateTab3(BMessage *msg = NULL) {
@@ -339,6 +339,85 @@ void BeKESAMainWindow::updateTab3(BMessage *msg = NULL) {
 				break;
 		}
 	}
+	bool state;
+	state = (t2te->Value() == B_CONTROL_ON);
+	t2ek->SetEnabled(state); t2es->SetEnabled(state); t2ec->SetEnabled(state);
+	t2eg->SetEnabled(state); t2ew->SetEnabled(state);
+	state = (t2to->Value() == B_CONTROL_ON);
+	t2op->SetEnabled(state); t2od->SetEnabled(state); t2ok->SetEnabled(state);
+	t2oj->SetEnabled(state);
+}
+
+void BeKESAMainWindow::curdata2Tab3(void) {
+	int i, t;
+	i = curdata->t2ekswys;
+	if ((i<0) || (i>7)) i=0;
+	t2wysitems[i]->SetMarked(true);
+	i = curdata->t2eksstop;
+	if ((i<0) || (i>6)) i=0;
+	t2stopitems[i]->SetMarked(true);
+	t = curdata->t2ekskier;
+	t2knw->SetValue((t & 0x0001) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2knn->SetValue((t & 0x0002) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2kne->SetValue((t & 0x0004) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2kww->SetValue((t & 0x0008) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2kee->SetValue((t & 0x0010) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2ksw->SetValue((t & 0x0020) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2kss->SetValue((t & 0x0040) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2kse->SetValue((t & 0x0080) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t = curdata->t2ekspozycja;
+	t2te->SetValue((t & 0x0001) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2to->SetValue((t & 0x0002) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2tn->SetValue((t & 0x0004) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2tb->SetValue((t & 0x0008) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t = curdata->t2ekspozycja2;
+	t2ek->SetValue((t & 0x0001) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2es->SetValue((t & 0x0002) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2ec->SetValue((t & 0x0004) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2eg->SetValue((t & 0x0008) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2ew->SetValue((t & 0x0010) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2op->SetValue((t & 0x0020) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2od->SetValue((t & 0x0040) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2ok->SetValue((t & 0x0080) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2oj->SetValue((t & 0x0100) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t2forma->SetText(curdata->t2forma.String());
+	updateTab3();
+}
+
+void BeKESAMainWindow::curdataFromTab3(void) {
+	// t2ekswys and t2eksstop set in update from msg
+	int t, u;
+	t = 0;
+	if (t2knw->Value() == B_CONTROL_ON) t |= 0x0001;
+	if (t2knn->Value() == B_CONTROL_ON) t |= 0x0002;
+	if (t2kne->Value() == B_CONTROL_ON) t |= 0x0004;
+	if (t2kww->Value() == B_CONTROL_ON) t |= 0x0008;
+	if (t2kee->Value() == B_CONTROL_ON) t |= 0x0010;
+	if (t2ksw->Value() == B_CONTROL_ON) t |= 0x0020;
+	if (t2kss->Value() == B_CONTROL_ON) t |= 0x0040;
+	if (t2kse->Value() == B_CONTROL_ON) t |= 0x0080;
+	curdata->t2ekskier = t;
+	t = 0; u = 0;
+	if (t2te->Value() == B_CONTROL_ON) {
+		t |= 0x0001;
+		if (t2ek->Value() == B_CONTROL_ON) u |= 0x0001;
+		if (t2es->Value() == B_CONTROL_ON) u |= 0x0002;
+		if (t2ec->Value() == B_CONTROL_ON) u |= 0x0004;
+		if (t2eg->Value() == B_CONTROL_ON) u |= 0x0008;
+		if (t2ew->Value() == B_CONTROL_ON) u |= 0x0010;
+	}
+	if (t2to->Value() == B_CONTROL_ON) {
+		t |= 0x0002;
+		if (t2op->Value() == B_CONTROL_ON) u |= 0x0020;
+		if (t2od->Value() == B_CONTROL_ON) u |= 0x0040;
+		if (t2ok->Value() == B_CONTROL_ON) u |= 0x0080;
+		if (t2oj->Value() == B_CONTROL_ON) u |= 0x0100;
+	}
+	if (t2tn->Value() == B_CONTROL_ON) t |= 0x0004;
+	if (t2tb->Value() == B_CONTROL_ON) t |= 0x0008;
+	curdata->t2ekspozycja = t;
+	curdata->t2ekspozycja2 = u;
+	curdata->t2forma = t2forma->Text();
 }
 
 void BeKESAMainWindow::initTab2(BTabView *tv) {
@@ -796,6 +875,7 @@ void BeKESAMainWindow::DoCommitCurdata(void) {
 		sql = "UPDATE karta SET ";
 		sql += "t1miejscowosc = %Q, t1nazwalokalna = %Q, t1gmina = %Q, t1powiat = %Q, t1wojewodztwo = %Q, t1nrobszaru = %Q, t1nrinwentarza = %Q, t1x = %Q, t1y = %Q, t1nrstanmiejsc = %Q, t1nrstanobszar = %Q, t1zrodloinformacji = %i";	// t1
 		sql += ", t2nadmorska = %i, t2duzedoliny = %i, t2maledoliny = %i, t2pozadolinami = %i";	// t2
+		sql += ", t2ekswys = %i, t2eksstop = %i, t2ekskier = %i, t2ekspozycja = %i, t2ekspozycja2 = %i, t2forma = %Q"; // t3
 		sql += " WHERE id = %i";
 	} else {	// INSERT
 		int newid = GenerateId();
@@ -803,9 +883,11 @@ void BeKESAMainWindow::DoCommitCurdata(void) {
 		sql = "INSERT INTO karta (";
 		sql += "t1miejscowosc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo, t1nrobszaru, t1nrinwentarza, t1x, t1y, t1nrstanmiejsc, t1nrstanobszar, t1zrodloinformacji"; // t1
 		sql += ", t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami";
+		sql += ", t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2, t2forma";
 		sql += ", id ) VALUES ( ";
 		sql += "%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %i,";	// t1
 		sql += "%i, %i, %i, %i,"; // t2
+		sql += "%i, %i, %i, %i, %i, %Q,"; // t3
 		sql += " %i)";
 	}
 	printf("sql:%s\n",sql.String());
@@ -826,6 +908,12 @@ void BeKESAMainWindow::DoCommitCurdata(void) {
 		curdata->t2duzedoliny,
 		curdata->t2maledoliny,
 		curdata->t2pozadolinami,
+		curdata->t2ekswys,
+		curdata->t2eksstop,
+		curdata->t2ekskier,
+		curdata->t2ekspozycja,
+		curdata->t2ekspozycja2,
+		curdata->t2forma.String(),
 		curdata->id
 	);
 	printf("result: %i, %s; id=%i\n", ret, dbErrMsg, curdata->id);
@@ -912,6 +1000,7 @@ void BeKESAMainWindow::FetchCurdata(int id) {
 	sql = "SELECT ";
 	sql += "t1miejscowosc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo, t1nrobszaru, t1nrinwentarza, t1x, t1y, t1nrstanmiejsc, t1nrstanobszar, t1zrodloinformacji"; // t1
 	sql += ", t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami";	// t2
+	sql += ", t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2, t2forma"; // t3
 	sql += " FROM karta WHERE id = ";
 	sql << id;
 printf("sql:%s\n",sql.String());
@@ -935,6 +1024,12 @@ printf("sql:%s\n",sql.String());
 	curdata->t2duzedoliny = toint(result[i++]);
 	curdata->t2maledoliny = toint(result[i++]);
 	curdata->t2pozadolinami = toint(result[i++]);
+	curdata->t2ekswys = toint(result[i++]);
+	curdata->t2eksstop = toint(result[i++]);
+	curdata->t2ekskier = toint(result[i++]);
+	curdata->t2ekspozycja = toint(result[i++]);
+	curdata->t2ekspozycja2 = toint(result[i++]);
+	curdata->t2forma = result[i++];
 
 	sqlite_free_table(result);
 	curdata->id = id;
@@ -952,6 +1047,7 @@ void kesadat::dump_all(void) {
 	printf("zrodlo: %x\n", t1zrodloinformacji);
 	printf("nadmor: %i, duzedol: %i, maledol: %i, pozadol: %i\n",t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami);
 	printf("wys: %i, stop: %i, kier: %i\n", t2ekswys, t2eksstop, t2ekskier);
+	printf("eks: %i, eks2: %i, forma: %s\n", t2ekspozycja, t2ekspozycja2, t2forma.String());
 	printf("\n");
 }
 
