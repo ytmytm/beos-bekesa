@@ -26,6 +26,8 @@ class kesadat {
 	BString t1nrobszaru, t1nrinwent, t1x, t1y, t1stanmiejsc, t1stanobszar;
 	int t1zrodloinformacji;
 	int t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami;
+	int t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2;
+	BString t2forma;
 };
 
 	class BButton;
@@ -61,14 +63,17 @@ class kesadat {
 			void curdata2Tabs(void);
 			// tab1
 			void initTab1(BTabView *tv);
-			void updateTab1(void);
+			void updateTab1(BMessage *msg = NULL);
 			void curdataFromTab1(void);
 			void curdata2Tab1(void);
 			// tab2
 			void initTab2(BTabView *tv);
-			void updateTab2(void);
+			void updateTab2(BMessage *msg = NULL);
 			void curdataFromTab2(void);
 			void curdata2Tab2(void);
+			// tab3
+			void initTab3(BTabView *tv);
+			void updateTab3(BMessage *msg = NULL);
 
 			// action
 			void ChangedSelection(int newid);
@@ -90,12 +95,19 @@ class kesadat {
 			BCheckBox *t2duzedoliny, *t2dw, *t2dd, *t2dz, *t2dy, *t2db;
 			BCheckBox *t2maledoliny, *t2md, *t2ms, *t2mk;
 			BCheckBox *t2pozadoliny, *t2pr, *t2pf, *t2pp, *t2pg;
+			// tab3 controls
+			BMenuItem *t2wysitems[7], *t2stopitems[6];
+			BCheckBox *t2knw, *t2knn, *t2kne, *t2kww, *t2kee, *t2ksw, *t2kss, *t2kse;
+			BRadioButton *t2te, *t2to, *t2tn, *t2tb;
+			BCheckBox *t2ek, *t2es, *t2ec, *t2eg, *t2ew;
+			BCheckBox *t2op, *t2od, *t2ok, *t2oj;
+			BTextControl *t2forma;
 
 			// database
 			sqlite *dbData;
 			char *dbErrMsg;
 			// data holders
-			kesadat *curdata;
+			kesadat *curdata;	// must exist BEFORE tabs are created
 			int currentid;	// id of currently edited data, <0 -> INSERT
 			int *idlist;	// ids of listView data
 	};

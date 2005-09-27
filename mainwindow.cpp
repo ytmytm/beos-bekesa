@@ -13,6 +13,11 @@
 //
 // note: with current id generation PRIMARY KEY(id,t1miescowosc,etc.) may be back
 //       and id must not be auto_increment augumented
+// ^^^XXX DONE, CHECKIT; NEEDS to enforce id&&t1miejscowosc!=NULL
+//						 or not... id is always different
+//
+// note: tabs functions should be exported to different files as BView derivs
+//		 (what about messages? must be passed here?)
 //
 // tabadd: init, update, cur2, curfrom, msg, kesaclear, kesadump
 //			update, insert, select
@@ -26,8 +31,12 @@
 #include <ListView.h>
 #include <Menu.h>
 #include <MenuBar.h>
+#include <MenuField.h>
 #include <MenuItem.h>
+#include <PopUpMenu.h>
+#include <RadioButton.h>
 #include <ScrollView.h>
+#include <StringView.h>
 #include <TabView.h>
 #include <TextControl.h>
 #include <stdio.h>
@@ -42,9 +51,18 @@ const uint32 LIST_INV		= 'Linv';
 const uint32 LIST_SEL		= 'Lsel';
 const uint32 TC1			= 'TC01';
 const uint32 TC2			= 'TC02';
+const uint32 TC3			= 'TC03';
+const uint32 TC3W			= 'TC3W';
+const uint32 TC3S			= 'TC3S';
+const uint32 TC3dookolna	= 'TC3D';
+const uint32 TC3wyczysc		= 'TC3C';
 
 BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	BRect(100, 100, 740, 580), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
+
+	// get memory for objects
+	idlist = NULL;
+	curdata = new kesadat();
 
 	BView *mainView = new BView(this->Bounds(), "mainView", B_FOLLOW_ALL_SIDES, 0);
 
@@ -101,10 +119,6 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 
 	tabView->Select(0);
 
-	// get memory for objects
-	idlist = NULL;
-	curdata = new kesadat();
-
 	// initialize database
 	int ret = OpenDatabase();
 	if (ret < 0)
@@ -122,6 +136,7 @@ BeKESAMainWindow::~BeKESAMainWindow() {
 void BeKESAMainWindow::initTabs(BTabView *tv) {
 	initTab1(tv);
 	initTab2(tv);
+	initTab3(tv);
 }
 
 void BeKESAMainWindow::curdataFromTabs(void) {
@@ -138,8 +153,192 @@ void BeKESAMainWindow::curdata2Tabs(void) {
 	tmp += ": ";
 	tmp += curdata->t1miejsc;
 	tmp += "; nr inwent.: ";
-	tmp += curdata->t1nrinwent;
+	tmp += curdata->t1nrinwent;	// XXX dodac jeszcze # faktow, nr obszaru i nrstanobszar
 	this->SetTitle(tmp.String());
+}
+
+void BeKESAMainWindow::initTab3(BTabView *tv) {
+	BTab *tab;
+	BBox *box, *box2;
+	BRect r, sl, sr, sm;
+
+	r = tv->Bounds();
+	r.InsetBy(5, 10);
+	BView *view = new BView(r, "viewtab3", B_FOLLOW_ALL_SIDES, 0);
+	view->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+
+	tab = new BTab(view);
+	tv->AddTab(view, tab);
+	tab->SetLabel("Ekspozycja");
+
+	r = view->Bounds();
+	r.InsetBy(10, 10);
+	r.bottom = r.top+140;
+
+	box = new BBox(r, "box3x1");
+	box->SetLabel("Stopień i kierunek ekspozycji");
+	view->AddChild(box);
+
+	sl = box->Bounds();
+	sl.InsetBy(10, 20);
+	sl.right = sl.left + sl.Width()/2;
+	sr = sl; sr.OffsetBy(sl.Width(), 0);
+
+	BPopUpMenu *menu;
+	BMenuItem *item;
+	BMessage *msg;
+	menu = new BPopUpMenu("t2mwysokosc");
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 0);
+	item = new BMenuItem("[brak]", msg); item->SetMarked(true); menu->AddItem(item);
+	t2wysitems[0] = item;
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 1);
+	item = new BMenuItem("0 m", msg); menu->AddItem(item);
+	t2wysitems[1] = item;
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 2);
+	item = new BMenuItem("0-2 m", msg); menu->AddItem(item);
+	t2wysitems[2] = item;
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 3);
+	item = new BMenuItem("2-4 m", msg); menu->AddItem(item);
+	t2wysitems[3] = item;
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 4);
+	item = new BMenuItem("4-8 m", msg); menu->AddItem(item);
+	t2wysitems[4] = item;
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 5);
+	item = new BMenuItem("8-15 m", msg); menu->AddItem(item);
+	t2wysitems[5] = item;
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 6);
+	item = new BMenuItem(">15 m", msg); menu->AddItem(item);
+	t2wysitems[6] = item;
+	msg = new BMessage(TC3W); msg->AddInt32("_item", 7);
+	item = new BMenuItem("?", msg); menu->AddItem(item);
+	t2wysitems[7] = item;
+	BMenuField *t2wysokosc = new BMenuField(sl, "t2wysokosc", "Wysokość ekspozycji:", menu, B_FOLLOW_LEFT, B_WILL_DRAW);
+	t2wysokosc->SetDivider(130);
+	box->AddChild(t2wysokosc);
+
+	menu = new BPopUpMenu("t2mstopien");
+	msg = new BMessage(TC3S); msg->AddInt32("_item", 0);
+	item = new BMenuItem("[brak]", msg); item->SetMarked(true); menu->AddItem(item);
+	t2stopitems[0] = item;
+	msg = new BMessage(TC3S); msg->AddInt32("_item", 1);
+	item = new BMenuItem("0-1 %", msg); menu->AddItem(item);
+	t2stopitems[1] = item;
+	msg = new BMessage(TC3S); msg->AddInt32("_item", 2);
+	item = new BMenuItem("1-3 %", msg); menu->AddItem(item);
+	t2stopitems[2] = item;
+	msg = new BMessage(TC3S); msg->AddInt32("_item", 3);
+	item = new BMenuItem("4-7 %", msg); menu->AddItem(item);
+	t2stopitems[3] = item;
+	msg = new BMessage(TC3S); msg->AddInt32("_item", 4);
+	item = new BMenuItem("8-15 %", msg); menu->AddItem(item);
+	t2stopitems[4] = item;
+	msg = new BMessage(TC3S); msg->AddInt32("_item", 5);
+	item = new BMenuItem(">15 %", msg); menu->AddItem(item);
+	t2stopitems[5] = item;
+	msg = new BMessage(TC3S); msg->AddInt32("_item", 6);
+	item = new BMenuItem("?", msg); menu->AddItem(item);
+	t2stopitems[6] = item;
+	BMenuField *t2stopien = new BMenuField(sr, "t2stopien", "Stopień ekspozycji:", menu, B_FOLLOW_RIGHT, B_WILL_DRAW);
+	box->AddChild(t2stopien);
+
+	box2 = new BBox(BRect(120, 55, 250, 125), "box3x2");
+	box->AddChild(box2);
+	sl = box2->Bounds();
+	sl.InsetBy(3, 3);
+	sl.right = sl.left + sl.Width()/3;
+	sl.bottom = sl.top + 20;
+	sm = sl; sm.OffsetBy(sl.Width(), 0);
+	sr = sm; sr.OffsetBy(sm.Width(), 0);
+	t2knw = new BCheckBox(sl, "t2knw", "NW", new BMessage(TC3));
+	t2knn = new BCheckBox(sm, "t2knn", "N",  new BMessage(TC3));
+	t2kne = new BCheckBox(sr, "t2kne", "NE", new BMessage(TC3));
+	sl.OffsetBy(0, 20); sm.OffsetBy(0, 20); sr.OffsetBy(0, 20);
+	t2kww = new BCheckBox(sl, "t2kee", "E",  new BMessage(TC3));
+	t2kee = new BCheckBox(sr, "t2kww", "W",  new BMessage(TC3));
+	sl.OffsetBy(0, 20); sm.OffsetBy(0, 20); sr.OffsetBy(0, 20);
+	t2ksw = new BCheckBox(sl, "t2ksw", "SW", new BMessage(TC3));
+	t2kss = new BCheckBox(sm, "t2kss", "S",  new BMessage(TC3));
+	t2kse = new BCheckBox(sr, "t2kse", "SE", new BMessage(TC3));
+	box2->AddChild(t2knw); box2->AddChild(t2knn); box2->AddChild(t2kne);
+	box2->AddChild(t2kww); box2->AddChild(t2kee);
+	box2->AddChild(t2ksw); box2->AddChild(t2kss); box2->AddChild(t2kse);
+
+	box->AddChild(new BButton(BRect(270, 55, 370, 80), "t2butfill", "Dookolna", new BMessage(TC3dookolna), B_FOLLOW_RIGHT));
+	box->AddChild(new BButton(BRect(270, 100, 370, 125), "t2butclear", "Wyczyść", new BMessage(TC3wyczysc), B_FOLLOW_RIGHT));
+	box->AddChild(new BStringView(BRect(10, 55, 100, 75), "t2e1", "Kierunek"));
+	box->AddChild(new BStringView(BRect(10, 85, 100, 105), "t2e2", "ekspozycji"));
+
+	r.OffsetBy(0, r.Height()+20); r.bottom = 355;
+	box = new BBox(r, "box3x2");
+	box->SetLabel("Rodzaj ekspozycji");
+	view->AddChild(box);
+	sl = box->Bounds();
+	sl.InsetBy(10, 20);
+	sl.right = sl.left + sl.Width()/3; sl.bottom = sl.top + 20;
+	sm = sl; sm.OffsetBy(sl.Width(), 0);
+	sr = sm; sr.OffsetBy(sm.Width(), 0);
+	t2te = new BRadioButton(sl, "t2te", "teren eksponowany", new BMessage(TC3));
+	t2to = new BRadioButton(sm, "t2to", "teren osłonięty", new BMessage(TC3));
+	t2tn = new BRadioButton(sr, "t2tn", "teren nieeksponowany", new BMessage(TC3));
+	sr.OffsetBy(0, 25);
+	t2tb = new BRadioButton(sr, "t2tb", "[brak]", new BMessage(TC3));
+	box->AddChild(t2te); box->AddChild(t2to); box->AddChild(t2tn);
+	box->AddChild(t2tb);
+	t2tb->SetValue(B_CONTROL_ON);
+	sl.OffsetBy(0, 25); sm.OffsetBy(0, 25);
+	t2ek = new BCheckBox(sl, "t2ek", "krawędź, stok", new BMessage(TC3));
+	t2op = new BCheckBox(sm, "t2op", "podstawa stoku", new BMessage(TC3));
+	sl.OffsetBy(0, 20); sm.OffsetBy(0, 20);
+	t2es = new BCheckBox(sl, "t2es", "sfałdowanie, mały cypel", new BMessage(TC3));
+	t2od = new BCheckBox(sm, "t2od", "dolina denund., jar", new BMessage(TC3));
+	sl.OffsetBy(0, 20); sm.OffsetBy(0, 20);
+	t2ec = new BCheckBox(sl, "t2ec", "cypel wybitny", new BMessage(TC3));
+	t2ok = new BCheckBox(sm, "t2ok", "kotlinka", new BMessage(TC3));
+	sl.OffsetBy(0, 20); sm.OffsetBy(0, 20);
+	t2eg = new BCheckBox(sl, "t2eg", "wał, garb terenowy", new BMessage(TC3));
+	t2oj = new BCheckBox(sm, "t2oj", "jaskinia", new BMessage(TC3));
+	sl.OffsetBy(0, 20);
+	t2ew = new BCheckBox(sl, "t2ew", "wyniesienie okrężne", new BMessage(TC3));
+	box->AddChild(t2ek); box->AddChild(t2es); box->AddChild(t2ec);
+	box->AddChild(t2eg); box->AddChild(t2ew);
+	box->AddChild(t2op); box->AddChild(t2od); box->AddChild(t2ok);
+	box->AddChild(t2oj);
+	sl.OffsetBy(0, 30); sl.right = 440;
+	t2forma = new BTextControl(sl, "t2forma", "Forma szczeg.", NULL, new BMessage(TC3));
+	box->AddChild(t2forma);
+	t2forma->SetDivider(100);
+	//updateTab3();
+//	t3wysitems[7]->SetMarked(true);
+}
+
+void BeKESAMainWindow::updateTab3(BMessage *msg = NULL) {
+	int32 item = 0;
+	if (msg) {
+		switch (msg->what) {
+			case TC3W:
+				if (msg->FindInt32("_item",&item) == B_OK)
+					curdata->t2ekswys = item;
+//				printf("tc3w: %i\n", item);
+				break;
+			case TC3S:
+				if (msg->FindInt32("_item",&item) == B_OK)
+					curdata->t2eksstop = item;
+//				printf("tc3s: %i\n", item);
+				break;
+			case TC3dookolna:
+				t2knw->SetValue(B_CONTROL_ON); t2knn->SetValue(B_CONTROL_ON); t2kne->SetValue(B_CONTROL_ON);
+				t2kww->SetValue(B_CONTROL_ON); t2kee->SetValue(B_CONTROL_ON);
+				t2ksw->SetValue(B_CONTROL_ON); t2kss->SetValue(B_CONTROL_ON); t2kse->SetValue(B_CONTROL_ON);
+				break;
+			case TC3wyczysc:
+				t2knw->SetValue(B_CONTROL_OFF); t2knn->SetValue(B_CONTROL_OFF); t2kne->SetValue(B_CONTROL_OFF);
+				t2kww->SetValue(B_CONTROL_OFF); t2kee->SetValue(B_CONTROL_OFF);
+				t2ksw->SetValue(B_CONTROL_OFF); t2kss->SetValue(B_CONTROL_OFF); t2kse->SetValue(B_CONTROL_OFF);
+				break;
+			default:
+				break;
+		}
+	}
 }
 
 void BeKESAMainWindow::initTab2(BTabView *tv) {
@@ -225,7 +424,7 @@ void BeKESAMainWindow::initTab2(BTabView *tv) {
 	updateTab2();
 }
 
-void BeKESAMainWindow::updateTab2(void) {
+void BeKESAMainWindow::updateTab2(BMessage *msg = NULL) {
 	bool state;
 	state = (t2nadmorska->Value() == B_CONTROL_ON);
 	t2nm->SetEnabled(state); t2np->SetEnabled(state); t2ni->SetEnabled(state);
@@ -414,7 +613,7 @@ void BeKESAMainWindow::initTab1(BTabView *tv) {
 	updateTab1();
 }
 
-void BeKESAMainWindow::updateTab1(void) {
+void BeKESAMainWindow::updateTab1(BMessage *msg = NULL) {
 
 }
 
@@ -470,11 +669,19 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 	switch (Message->what) {
 		case TC1:
 			curdata->dirty = true;
-			updateTab1();
+			updateTab1(Message);
 			break;
 		case TC2:
 			curdata->dirty = true;
-			updateTab2();
+			updateTab2(Message);
+			break;
+		case TC3:
+		case TC3W:
+		case TC3S:
+		case TC3dookolna:
+		case TC3wyczysc:
+			curdata->dirty = true;
+			updateTab3(Message);
 			break;
 		case BUT_NEW:
 			if (CommitCurdata()) {
@@ -744,6 +951,7 @@ void kesadat::dump_all(void) {
 		t1nrobszaru.String(), t1nrinwent.String(), t1x.String(), t1y.String(), t1stanmiejsc.String(), t1stanobszar.String());
 	printf("zrodlo: %x\n", t1zrodloinformacji);
 	printf("nadmor: %i, duzedol: %i, maledol: %i, pozadol: %i\n",t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami);
+	printf("wys: %i, stop: %i, kier: %i\n", t2ekswys, t2eksstop, t2ekskier);
 	printf("\n");
 }
 
@@ -753,6 +961,8 @@ void kesadat::clear(void) {
 	t1miejsc = t1nazwalokalna = t1gmina = t1powiat = t1wojewodztwo = t1nrobszaru = t1nrinwent = t1x = t1y = t1stanmiejsc = t1stanobszar = "";
 	t1zrodloinformacji = 0;
 	t2nadmorska = t2duzedoliny = t2maledoliny = t2pozadolinami = 0;
+	t2ekswys = t2eksstop = t2ekskier = t2ekspozycja = t2ekspozycja2 = 0;
+	t2forma = "";
 }
 
 //---------------------
