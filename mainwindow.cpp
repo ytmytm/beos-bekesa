@@ -655,8 +655,8 @@ void BeKESAMainWindow::CloseDatabase(void) {
 void BeKESAMainWindow::RefreshIndexList(void) {
 	// clear current list
 	if (listView->CountItems()>0) {
-		void *anItem;
-		for (int i=0; (anItem=listView->ItemAt(i)); i++)
+		BStringItem *anItem;
+		for (int i=0; (anItem=(BStringItem*)listView->ItemAt(i)); i++)
 			delete anItem;
 		if (!listView->IsEmpty())
 			listView->MakeEmpty();
