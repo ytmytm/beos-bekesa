@@ -1,4 +1,12 @@
 //
+// weryfikacja z kesaed:
+//	- źródła informacji inaczej (8 źródeł)
+//  - rodzaj ekspozycji - forma szczególna to radio
+//			a stringview to region geograficzny (nowe pole), gdzie na szablon??
+//
+// udokumentować co który bit znaczy
+//
+//
 // start: open db, ask for dbfile if not found
 // deal with database file like in bsap (sqlite_open never fails)
 //	(if database doesn't exist - create it with embedded schema?)
