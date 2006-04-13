@@ -26,15 +26,15 @@ CREATE TABLE karta (
 	t2ekspozycja	INTEGER,
 	t2ekspozycja2	INTEGER,
 	t2forma		TEXT,
----
+
 	t3zabudowa		INTEGER,
 	t3rodzaj		INTEGER,
 	t3okreslenie	TEXT,
 
 	t5gleba			INTEGER,
-	t5kamienie		INTEGER,
+	t5kamienistosc		INTEGER,
 	t5okreslenie	TEXT,
-
+---
 	t6obserwacja	INTEGER,
 	t6pole			INTEGER,
 	t6nasycenie		INTEGER,

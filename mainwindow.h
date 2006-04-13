@@ -28,6 +28,10 @@ class kesadat {
 	int t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami;
 	int t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2;
 	BString t2forma;
+	int t3zabudowa, t3rodzaj;
+	BString t3okreslenie;
+	int t5gleba, t5kamienistosc;
+	BString t5okreslenie;
 };
 
 	class BButton;
@@ -80,6 +84,11 @@ class kesadat {
 			void updateTab3(BMessage *msg = NULL);
 			void curdataFromTab3(void);
 			void curdata2Tab3(void);
+			// tab4
+			void initTab4(BTabView *tv);
+			void updateTab4(BMessage *msg = NULL);
+			void curdataFromTab4(void);
+			void curdata2Tab4(void);
 
 			// action
 			void ChangedSelection(int newid);
@@ -108,6 +117,11 @@ class kesadat {
 			BCheckBox *t2ek, *t2es, *t2ec, *t2eg, *t2ew;
 			BCheckBox *t2op, *t2od, *t2ok, *t2oj;
 			BTextControl *t2forma;
+			// tab4 controls
+			BMenuItem *t3zabitems[4], *t3kamitems[4];
+			BCheckBox *t3tl, *t3ts, *t3tp, *t3to, *t3ta, *t3tr, *t3te, *t3tz;
+			BTextControl *t3tokr, *t3gokr;
+			BCheckBox *t3gp, *t3gg, *t3gt;
 
 			// database
 			sqlite *dbData;
