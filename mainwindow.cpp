@@ -21,6 +21,7 @@
 // note: tabs functions should be exported to different files as BView derivs
 //		 (what about messages? must be passed here? NO - updateTab only)
 // note: rewrite combine_checkboxes as struct { size, cb_list } and common set of functions
+// note: rewrite menu_popup as generated from list { "item0", "item1"... }
 //
 // tabadd: init, update, cur2, curfrom, msg, kesaclear, kesadump
 //			update, insert, select

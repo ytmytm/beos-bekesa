@@ -21,7 +21,7 @@ const uint32 TC6S			= 'TC6S';
 void BeKESAMainWindow::initTab5(BTabView *tv) {
 	BTab *tab;
 	BBox *box;
-	BRect r,s,sl,sr;
+	BRect r,sl,sr;
 
 	r = tv->Bounds();
 	r.InsetBy(5,10);
@@ -35,7 +35,7 @@ void BeKESAMainWindow::initTab5(BTabView *tv) {
 	r = view->Bounds();
 	r.top = 10; r.left = 10; r.right -= 10;
 	r.bottom = r.top + 140;
-	box = new BBox(r, "box4x1");
+	box = new BBox(r, "box5x1");
 	box->SetLabel("Charakterystyka");
 	view->AddChild(box);
 
@@ -157,6 +157,62 @@ void BeKESAMainWindow::initTab5(BTabView *tv) {
 	t6mges->SetDivider(100);
 	box->AddChild(t6mges);
 
+	r.top += 145; r.bottom += 145;
+	box = new BBox(r, "box5x2");
+	box->SetLabel("Zagrożenia");
+	view->AddChild(box);
+
+	sl = box->Bounds();
+	sl.InsetBy(10,20);
+	sl.right = sl.left + sl.Width()/2;
+	sl.bottom = sl.top + 20;
+	sr = sl; sr.OffsetBy(sl.Width(),0);
+
+	menu = new BPopUpMenu("t7mzagrozenie");
+	msg = new BMessage(TC6Z); msg->AddInt32("_item", 0);
+	item = new BMenuItem("[brak]", msg); item->SetMarked(true); menu->AddItem(item);
+	t7zagitems[0] = item;
+	msg = new BMessage(TC6Z); msg->AddInt32("_item", 1);
+	item = new BMenuItem("istnieje", msg); menu->AddItem(item);
+	t7zagitems[1] = item;
+	msg = new BMessage(TC6Z); msg->AddInt32("_item", 2);
+	item = new BMenuItem("nie istnieje", msg); menu->AddItem(item);
+	t7zagitems[2] = item;
+	BMenuField *t7mzag = new BMenuField(sl, "t6mfzag", "Zagrożenie", menu, B_FOLLOW_LEFT, B_WILL_DRAW);
+	t7mzag->SetDivider(100);
+	box->AddChild(t7mzag);
+
+	menu = new BPopUpMenu("t7mstale");
+	msg = new BMessage(TC6S); msg->AddInt32("_item", 0);
+	item = new BMenuItem("[brak]", msg); item->SetMarked(true); menu->AddItem(item);
+	t7staitems[0] = item;
+	msg = new BMessage(TC6S); msg->AddInt32("_item", 1);
+	item = new BMenuItem("stałe", msg); menu->AddItem(item);
+	t7staitems[1] = item;
+	msg = new BMessage(TC6S); msg->AddInt32("_item", 2);
+	item = new BMenuItem("doraźne", msg); menu->AddItem(item);
+	t7staitems[2] = item;
+	BMenuField *t7msta = new BMenuField(sr, "t6mfsta", "Rodzaj", menu, B_FOLLOW_LEFT, B_WILL_DRAW);
+	t7msta->SetDivider(100);
+	box->AddChild(t7msta);
+
+	sl.OffsetBy(0,35); sr.OffsetBy(0,35);
+
+	t7zl = new BCheckBox(sl, "t7zl", "przez ludzi", new BMessage(TC6));
+	t7zp = new BCheckBox(sr, "t7zp", "użytkownik prywatny", new BMessage(TC6));
+	sl.OffsetBy(0,25); sr.OffsetBy(0,25);
+	t7zn = new BCheckBox(sl, "t7zn", "przez naturę", new BMessage(TC6));
+	t7zs = new BCheckBox(sr, "t7zs", "użytkownik społeczny", new BMessage(TC6));
+
+	box->AddChild(t7zl); box->AddChild(t7zn);
+	box->AddChild(t7zp); box->AddChild(t7zs);
+
+	sl.OffsetBy(0,35);
+	sl.right = sr.right;
+
+	t7tdodatkowe = new BTextControl(sl, "t7tdodatkowe", "Dod. dane", NULL, new BMessage(TC6));
+	t7tdodatkowe->SetDivider(100);
+	box->AddChild(t7tdodatkowe);
 
 	updateTab5();
 }
@@ -190,7 +246,13 @@ void BeKESAMainWindow::updateTab5(BMessage *msg = NULL) {
 					curdata->t6gestosc = item;
 				break;
 			case TC6Z:
-			case TC6S:			
+				if (msg->FindInt32("_item", &item) == B_OK)
+					curdata->t7zagrozenie = item;
+				break;
+			case TC6S:
+				if (msg->FindInt32("_item", &item) == B_OK)
+					curdata->t7stale = item;
+				break;			
 			default:
 				break;
 		}
@@ -217,9 +279,28 @@ void BeKESAMainWindow::curdata2Tab5(void) {
 	i = curdata->t6gestosc;
 	if ((i<0) || (i>3)) i=0;
 	t6gesitems[i]->SetMarked(true);
-
+	i = curdata->t7zagrozenie;
+	if ((i<0) || (i>2)) i=0;
+	t7zagitems[i]->SetMarked(true);
+	i = curdata->t7stale;
+	if ((i<0) || (i>2)) i=0;
+	t7staitems[i]->SetMarked(true);
+	t = curdata->t7przezco;
+	t7zl->SetValue((t & 0x0001) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t7zn->SetValue((t & 0x0002) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t7zp->SetValue((t & 0x0004) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t7zs->SetValue((t & 0x0008) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t7tdodatkowe->SetText(curdata->t7dodatkowe.String());
 }
 
 void BeKESAMainWindow::curdataFromTab5(void) {
 	// menu items set in update from msg
+	int t;
+	t = 0;
+	if (t7zl->Value() == B_CONTROL_ON) t |= 0x0001;
+	if (t7zn->Value() == B_CONTROL_ON) t |= 0x0002;
+	if (t7zp->Value() == B_CONTROL_ON) t |= 0x0004;
+	if (t7zs->Value() == B_CONTROL_ON) t |= 0x0008;
+	curdata->t7przezco = t;
+	curdata->t7dodatkowe = t7tdodatkowe->Text();
 }
