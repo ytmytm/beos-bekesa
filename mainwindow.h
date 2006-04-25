@@ -32,6 +32,9 @@ class kesadat {
 	BString t3okreslenie;
 	int t5gleba, t5kamienistosc;
 	BString t5okreslenie;
+	int t6obserwacja, t6pole, t6nasycenie, t6koncen, t6pow, t6gestosc;
+	int t7zagrozenie, t7stale, t7przezco;
+	BString t7dodatkowe;
 };
 
 	class BButton;
@@ -89,6 +92,11 @@ class kesadat {
 			void updateTab4(BMessage *msg = NULL);
 			void curdataFromTab4(void);
 			void curdata2Tab4(void);
+			// tab5
+			void initTab5(BTabView *tv);
+			void updateTab5(BMessage *msg = NULL);
+			void curdataFromTab5(void);
+			void curdata2Tab5(void);
 
 			// action
 			void ChangedSelection(int newid);
@@ -122,6 +130,12 @@ class kesadat {
 			BCheckBox *t3tl, *t3ts, *t3tp, *t3to, *t3ta, *t3tr, *t3te, *t3tz;
 			BTextControl *t3tokr, *t3gokr;
 			BCheckBox *t3gp, *t3gg, *t3gt;
+			// tab5 controls
+			BMenuItem *t6obsitems[3], *t6politems[3], *t6nasitems[3];
+			BMenuItem *t6konitems[4], *t6powitems[8], *t6gesitems[4];
+			BMenuItem *t7zagitems[3], *t7staitems[3];
+			BCheckBox *t7zl, *t7zn, *t7zp, *t7zs;
+			BTextControl *t7tdodatkowe;
 
 			// database
 			sqlite *dbData;

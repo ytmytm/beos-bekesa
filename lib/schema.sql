@@ -34,7 +34,7 @@ CREATE TABLE karta (
 	t5gleba			INTEGER,
 	t5kamienistosc		INTEGER,
 	t5okreslenie	TEXT,
----
+
 	t6obserwacja	INTEGER,
 	t6pole			INTEGER,
 	t6nasycenie		INTEGER,
@@ -44,10 +44,9 @@ CREATE TABLE karta (
 
 	t7zagrozenie	INTEGER,
 	t7stale			INTEGER,
-	t7przez1		INTEGER,
-	t7przez2		INTEGER,
+	t7przezco		INTEGER,
 	t7dodatkowe		TEXT,
-
+---
 	t8ocena			INTEGER,
 	t8inwent		INTEGER,
 	t8badania		INTEGER,

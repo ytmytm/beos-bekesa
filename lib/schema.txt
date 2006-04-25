@@ -130,20 +130,62 @@ t5kamienistosc
 		2	srednia
 		3	duza
 t5okreslenie	Okreslenie blizsze
+
+t6obserwacja
+		Obserwacja
+		0	[brak]
+		1	utrudniona
+		2	bez przeszkod
+t6pole
+		Pole
+		0	[brak]
+		1	otwarte
+		2	zamkniete
+t6nasycenie	
+		Nasycenie znaleziskami
+		0	[brak]
+		1	rownomierne
+		2	nierownomierne
+t6koncen	
+		Nasycenie
+		0	[brak]
+		1	jednocentryczne
+		2	wielocentryczne
+		3	dekoncentryczne
+t6pow
+		Powierzchnia stanowiska (ha)
+		0	[brak]
+		1	0
+		2	<0.01
+		3	<0.5
+		4	<1
+		5	<5
+		6	<15
+		7	>15
+t6gestosc
+		Gestosc wystepowania materialow
+		0	[brak]
+		1	mala
+		2	srednia
+		3	duza
+t7zagrozenie	
+		Zagrozenia
+		0	[brak]
+		1	istnieje
+		2	nie istnieje
+t7stale
+		Zagrozenie
+		0	[brak]
+		1	stale
+		2	dorazne
+t7przezco
+		Zagrozenie ze strony
+		1	przez ludzi
+		2	przez nature
+		4	uzytkownik prywatny
+		8	uzytkownik spoleczny
+t7dodatkowe	Dane dodatkowe	
 ---
-	t6obserwacja	INTEGER,
-	t6pole			INTEGER,
-	t6nasycenie		INTEGER,
-	t6koncen		INTEGER,
-	t6pow			INTEGER,
-	t6gestosc		INTEGER,
-
-	t7zagrozenie	INTEGER,
-	t7stale			INTEGER,
-	t7przez1		INTEGER,
-	t7przez2		INTEGER,
-	t7dodatkowe		TEXT,
-
 	t8ocena			INTEGER,
 	t8inwent		INTEGER,
 	t8badania		INTEGER,

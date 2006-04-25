@@ -1,11 +1,7 @@
 //
 // weryfikacja z kesaed:
-//	- źródła informacji inaczej (8 źródeł)
 //  - rodzaj ekspozycji - forma szczególna to radio
 //			a stringview to region geograficzny (nowe pole), gdzie na szablon??
-//
-// udokumentować co który bit znaczy
-//
 //
 // start: open db, ask for dbfile if not found
 // deal with database file like in bsap (sqlite_open never fails)
@@ -60,6 +56,15 @@ const uint32 TC3wyczysc		= 'TC3C';
 const uint32 TC4			= 'TC04';
 const uint32 TC4Z			= 'TC4Z';
 const uint32 TC4K			= 'TC4K';
+const uint32 TC6			= 'TC06';
+const uint32 TC6O			= 'TC6O';
+const uint32 TC6P			= 'TC6P';
+const uint32 TC6N			= 'TC6N';
+const uint32 TC6C			= 'TC6C';
+const uint32 TC6W			= 'TC6W';
+const uint32 TC6G			= 'TC6G';
+const uint32 TC6Z			= 'TC6Z';
+const uint32 TC6S			= 'TC6S';
 
 BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	BRect(100, 100, 740, 580), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
@@ -142,6 +147,7 @@ void BeKESAMainWindow::initTabs(BTabView *tv) {
 	initTab2(tv);
 	initTab3(tv);
 	initTab4(tv);
+	initTab5(tv);
 }
 
 void BeKESAMainWindow::curdataFromTabs(void) {
@@ -149,6 +155,7 @@ void BeKESAMainWindow::curdataFromTabs(void) {
 	curdataFromTab2();
 	curdataFromTab3();
 	curdataFromTab4();
+	curdataFromTab5();
 }
 
 void BeKESAMainWindow::curdata2Tabs(void) {
@@ -156,6 +163,7 @@ void BeKESAMainWindow::curdata2Tabs(void) {
 	curdata2Tab2();
 	curdata2Tab3();
 	curdata2Tab4();
+	curdata2Tab5();
 
 	BString tmp;
 	tmp = APP_NAME;
@@ -191,6 +199,18 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 		case TC4K:
 			curdata->dirty = true;
 			updateTab4(Message);
+			break;
+		case TC6:
+		case TC6O:
+		case TC6P:
+		case TC6N:
+		case TC6C:
+		case TC6W:
+		case TC6G:
+		case TC6Z:
+		case TC6S:
+			curdata->dirty = true;
+			updateTab5(Message);
 			break;
 		case BUT_NEW:
 			if (CommitCurdata()) {
@@ -307,6 +327,7 @@ void BeKESAMainWindow::DoCommitCurdata(void) {
 		sql += ", t2nadmorska = %i, t2duzedoliny = %i, t2maledoliny = %i, t2pozadolinami = %i";	// t2
 		sql += ", t2ekswys = %i, t2eksstop = %i, t2ekskier = %i, t2ekspozycja = %i, t2ekspozycja2 = %i, t2forma = %Q"; // t3
 		sql += ", t3zabudowa = %i, t3rodzaj = %i, t3okreslenie = %Q, t5gleba = %i, t5kamienistosc = %i, t5okreslenie = %Q"; // t4
+		sql += ", t6obserwacja = %i, t6pole = %i, t6nasycenie = %i, t6koncen = %i, t6pow = %i, t6gestosc = %i, t7zagrozenie = %i, t7stale = %i, t7przezco = %i, t7dodatkowe = %Q"; // t5
 		sql += " WHERE id = %i";
 	} else {	// INSERT
 		int newid = GenerateId();
@@ -316,11 +337,13 @@ void BeKESAMainWindow::DoCommitCurdata(void) {
 		sql += ", t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami";
 		sql += ", t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2, t2forma";
 		sql += ", t3zabudowa, t3rodzaj, t3okreslenie, t5gleba, t5kamienistosc, t5okreslenie";
+		sql += ", t6obserwacja, t6pole, t6nasycenie, t6koncen, t6pow, t6gestosc, t7zagrozenie, t7stale, t7przezco, t7dodatkowe";
 		sql += ", id ) VALUES ( ";
 		sql += "%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %i,";	// t1
 		sql += "%i, %i, %i, %i,"; // t2
 		sql += "%i, %i, %i, %i, %i, %Q,"; // t3
 		sql += "%i, %i, %Q, %i, %i, %Q,"; // t4
+		sql += "%i, %i, %i, %i, %i, %i, %i, %i, %i, %Q,"; // t5
 		sql += " %i)";
 	}
 	printf("sql:%s\n",sql.String());
@@ -353,9 +376,20 @@ void BeKESAMainWindow::DoCommitCurdata(void) {
 		curdata->t5gleba,
 		curdata->t5kamienistosc,
 		curdata->t5okreslenie.String(),
+		curdata->t6obserwacja,
+		curdata->t6pole,
+		curdata->t6nasycenie,
+		curdata->t6koncen,
+		curdata->t6pow,
+		curdata->t6gestosc,
+		curdata->t7zagrozenie,
+		curdata->t7stale,
+		curdata->t7przezco,
+		curdata->t7dodatkowe.String(),
 		curdata->id
 	);
 	printf("result: %i, %s; id=%i\n", ret, dbErrMsg, curdata->id);
+curdata->dump_all();
 	currentid = curdata->id;
 	curdata->dirty = false;
 	RefreshIndexList();	//XXX here or later?
@@ -441,6 +475,7 @@ void BeKESAMainWindow::FetchCurdata(int id) {
 	sql += ", t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami";	// t2
 	sql += ", t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2, t2forma"; // t3
 	sql += ", t3zabudowa, t3rodzaj, t3okreslenie, t5gleba, t5kamienistosc, t5okreslenie"; // t4
+	sql += ", t6obserwacja, t6pole, t6nasycenie, t6koncen, t6pow, t6gestosc, t7zagrozenie, t7stale, t7przezco, t7dodatkowe"; // t5
 	sql += " FROM karta WHERE id = ";
 	sql << id;
 printf("sql:%s\n",sql.String());
@@ -476,6 +511,16 @@ printf("sql:%s\n",sql.String());
 	curdata->t5gleba = toint(result[i++]);
 	curdata->t5kamienistosc = toint(result[i++]);
 	curdata->t5okreslenie = result[i++];
+	curdata->t6obserwacja = toint(result[i++]);
+	curdata->t6pole = toint(result[i++]);
+	curdata->t6nasycenie = toint(result[i++]);
+	curdata->t6koncen = toint(result[i++]);
+	curdata->t6pow = toint(result[i++]);
+	curdata->t6gestosc = toint(result[i++]);
+	curdata->t7zagrozenie = toint(result[i++]);
+	curdata->t7stale = toint(result[i++]);
+	curdata->t7przezco = toint(result[i++]);
+	curdata->t7dodatkowe = result[i++];
 
 	sqlite_free_table(result);
 	curdata->id = id;
@@ -496,6 +541,8 @@ void kesadat::dump_all(void) {
 	printf("eks: %i, eks2: %i, forma: %s\n", t2ekspozycja, t2ekspozycja2, t2forma.String());
 	printf("zabud: %i, rodzaj: %i, okr: %s\n", t3zabudowa, t3rodzaj, t3okreslenie.String());
 	printf("gleba: %i, kamienie: %i, okr: %s\n", t5gleba, t5kamienistosc, t5okreslenie.String());
+	printf("obs: %i, pole: %i, nasyc: %i, koncen: %i\n", t6obserwacja, t6pole, t6nasycenie, t6koncen);
+	printf("pow: %i, gestosc: %i, zagroz: %i, stale: %i, przezco: %i, dod: %s\n", t6pow, t6gestosc, t7zagrozenie, t7stale, t7przezco, t7dodatkowe.String());
 	printf("\n");
 }
 
@@ -511,6 +558,9 @@ void kesadat::clear(void) {
 	t3okreslenie = "";
 	t5gleba = t5kamienistosc = 0;
 	t5okreslenie = "";
+	t6obserwacja = t6pole = t6nasycenie = t6koncen = t6pow = t6gestosc = 0;
+	t7zagrozenie = t7stale = t7przezco = 0;
+	t7dodatkowe = "";
 }
 
 //---------------------
