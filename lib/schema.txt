@@ -1,0 +1,162 @@
+Pole		Opis
+---------------------------
+id		klucz
+t1miejscowosc	Miejscowosc
+t1nazwalokalna	Nazwa lokalna
+t1gmina		Gmina
+t1powiat	Powiat
+t1wojewodztwo	Wojewodztwo
+t1nrobszaru	Nr obszaru AZP
+t1nrinwentarza	Nr inwentarza
+t1x		Wsp. X na mapie
+t1y		Wsp. Y na mapie
+t1nrstanmiejsc	Nr stanowiska/miejscowosc
+t1nrstanobszar	Nr stanowiska/obszar
+t1zrodloinformacji
+		Zrodlo informacji
+		1	Z wywiadu
+		2	Terenowe
+		4	Luźne (lotnicze?)
+		8	Wykopaliskowe
+		16	Archiwalne
+		32	Powierzchniowe
+		64	Rekonstrukcja lokaliz.
+t2nadmorska
+		Strefa nadmorska
+		1	[on]
+		2	w morzu
+		4	plaza
+		8	mierzeja
+		16	skarpa
+		32	wal wydmowy
+t2duzedoliny
+		Duze doliny
+		1	[on]
+		2	w wodzie
+		4	terasa denna
+		8	terasa nadzalewowa
+		16	terasa wyzsza
+		32	brzeg wysoczyzny
+t2maledoliny
+		Male doliny
+		1	[on]
+		2	dno doliny
+		4	stok doliny
+		8	krawedz doliny
+t2pozadolinami
+		Strefa poza dolinami
+		1	[on]
+		2	rownina
+		4	obszar falisty
+		8	obszar pagorkowaty
+		16	obszar gorzysty
+t2ekswys
+		Wysokosc ekspozycji
+		0	[brak]
+		1	0m
+		2	0-2m
+		3	2-4m
+		4	4-8m
+		5	8-15m
+		6	>16m
+		7	?
+t2eksstop
+		Stopien ekspozycji
+		0	[brak]
+		1	0-1%
+		2	1-3%
+		3	4-7%
+		4	8-15%
+		5	>15%
+		6	?
+t2ekskier
+		Kierunek ekspozycji
+		0	(brak)
+		1	NW
+		2	N
+		4	NE
+		8	W
+		16	E
+		32	SW
+		64	S
+		128	SE	
+t2ekspozycja
+		Rodzaj ekspozycji
+		1	teren eksponowany
+		2	teren osloniety
+		4	teren nieeksponowany
+		8	[brak]
+t2ekspozycja2
+		Rodzaj ekspozycji (checkbox)
+		(dla t2ekspozycja == 1)
+		1	krawedz, stok
+		2	sfaldowanie, maly cypel
+		4	cypel wybitny
+		8	wal, garb terenowy
+		16	wyniesienie okrezne
+		(dla t2ekspozycja == 2)
+		32	podstawa stoku
+		64	dolina denund, jar
+		128	kotlinka
+		256	jaskinia
+t2forma		Forma szczegolowa
+t3zabudowa
+		Dostepnosc
+		0	[brak]
+		1	niezabudowany
+		2	sredniozabudowany
+		3	zabudowany
+t3rodzaj
+		Rodzaj zabudowy
+		1	las
+		2	sad
+		4	park
+		8	pole orne
+		16	laka
+		32	teren rolniczy prywatny
+		64	teren rolniczy spoleczny
+		128	teren przemyslowy
+t3okreslenie	Okreslenie blizsze
+t5gleba
+		Rodzaj gleby
+		1	piaszczysta
+		2	gliniasta
+		4	torfowo-bagnista
+t5kamienistosc
+		Kamienistosc
+		0	[brak]
+		1	mala
+		2	srednia
+		3	duza
+t5okreslenie	Okreslenie blizsze
+---
+	t6obserwacja	INTEGER,
+	t6pole			INTEGER,
+	t6nasycenie		INTEGER,
+	t6koncen		INTEGER,
+	t6pow			INTEGER,
+	t6gestosc		INTEGER,
+
+	t7zagrozenie	INTEGER,
+	t7stale			INTEGER,
+	t7przez1		INTEGER,
+	t7przez2		INTEGER,
+	t7dodatkowe		TEXT,
+
+	t8ocena			INTEGER,
+	t8inwent		INTEGER,
+	t8badania		INTEGER,
+	t8interwen		INTEGER,
+	t8dodatkowe		TEXT,
+
+	t9autor			TEXT,
+	t9data			TEXT,
+	t9chrono		TEXT,
+	t9sprawdzil		TEXT,
+
+	t10materialy	TEXT,
+	t10dalsze		TEXT,
+
+	PRIMARY KEY(id,t1miejscowosc)
+ );
+
