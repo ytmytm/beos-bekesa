@@ -14,13 +14,14 @@ t1nrstanmiejsc	Nr stanowiska/miejscowosc
 t1nrstanobszar	Nr stanowiska/obszar
 t1zrodloinformacji
 		Zrodlo informacji
-		1	Z wywiadu
+		1	Archiwalne
 		2	Terenowe
-		4	Luźne (lotnicze?)
-		8	Wykopaliskowe
-		16	Archiwalne
-		32	Powierzchniowe
-		64	Rekonstrukcja lokaliz.
+		4	Wykopaliska
+		8	Powierzchniowe
+		16	Luzne
+		32	Rekonstrukcja
+		64	Zaslyszane
+		128	Samolot
 t2nadmorska
 		Strefa nadmorska
 		1	[on]

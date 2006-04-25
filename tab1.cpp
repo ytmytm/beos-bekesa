@@ -90,22 +90,23 @@ void BeKESAMainWindow::initTab1(BTabView *tv) {
 	sl.right = sl.left+sl.Width()/3; sl.top = 10; sl.left = 10;
 	sl.bottom = sl.top + 20; sl.right -= 10;
 	sr = sl; sr.OffsetBy(sl.Width(), 0);
-	s = sl; s.OffsetBy(sl.Width()*2, 30);
+	s = sl; s.OffsetBy(sl.Width()*2, 0);
 
-	t1cz = new BCheckBox(sl, "t1cz", "z wywiadu", new BMessage(TC1));
-	t1cw = new BCheckBox(sr, "t1cw", "wykopaliskowe", new BMessage(TC1));
-	sl.OffsetBy(0,30); sr.OffsetBy(0,30);
-	t1ct = new BCheckBox(sl, "t1ct", "terenowe", new BMessage(TC1));
-	t1ca = new BCheckBox(sr, "t1ca", "archiwalne", new BMessage(TC1));
-	sl.OffsetBy(0,30); sr.OffsetBy(0,30);
-	t1cl = new BCheckBox(sl, "t1cl", "luźne", new BMessage(TC1));
+	t1ca = new BCheckBox(sl, "t1ca", "archiwalne", new BMessage(TC1));
 	t1cp = new BCheckBox(sr, "t1cp", "powierzchniowe", new BMessage(TC1));
-	t1cr = new BCheckBox(s, "t1cr", "rekonstrukcja lokaliz.", new BMessage(TC1));
+	t1cz = new BCheckBox(s,  "t1cz", "zasłyszane", new BMessage(TC1));
+	sl.OffsetBy(0,30); sr.OffsetBy(0,30); s.OffsetBy(0,30);
+	t1ct = new BCheckBox(sl, "t1ct", "terenowe", new BMessage(TC1));
+	t1cl = new BCheckBox(sr, "t1cl", "luźne", new BMessage(TC1));
+	t1cs = new BCheckBox(s,  "t1cs", "samolot", new BMessage(TC1));
+	sl.OffsetBy(0,30); sr.OffsetBy(0,30); s.OffsetBy(0,30);
+	t1cw = new BCheckBox(sl, "t1cw", "wykopaliskowe", new BMessage(TC1));
+	t1cr = new BCheckBox(sr, "t1cr", "rekonstrukcja lokaliz.", new BMessage(TC1));
 
-	box->AddChild(t1cz); box->AddChild(t1ct);
-	box->AddChild(t1cl); box->AddChild(t1cw);
-	box->AddChild(t1ca); box->AddChild(t1cp);
-	box->AddChild(t1cr);
+	box->AddChild(t1ca); box->AddChild(t1ct);
+	box->AddChild(t1cw); box->AddChild(t1cp);
+	box->AddChild(t1cl); box->AddChild(t1cr);
+	box->AddChild(t1cz); box->AddChild(t1cs);
 
 	updateTab1();
 }
@@ -127,13 +128,14 @@ void BeKESAMainWindow::curdata2Tab1(void) {
 	t1stanmiejsc->SetText(curdata->t1stanmiejsc.String());
 	t1stanobszar->SetText(curdata->t1stanobszar.String());
 	int t1 = curdata->t1zrodloinformacji;
-	t1cz->SetValue((t1 & 0x0001) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1ca->SetValue((t1 & 0x0001) ? B_CONTROL_ON : B_CONTROL_OFF);
 	t1ct->SetValue((t1 & 0x0002) ? B_CONTROL_ON : B_CONTROL_OFF);
-	t1cl->SetValue((t1 & 0x0004) ? B_CONTROL_ON : B_CONTROL_OFF);
-	t1cw->SetValue((t1 & 0x0008) ? B_CONTROL_ON : B_CONTROL_OFF);
-	t1ca->SetValue((t1 & 0x0010) ? B_CONTROL_ON : B_CONTROL_OFF);
-	t1cp->SetValue((t1 & 0x0020) ? B_CONTROL_ON : B_CONTROL_OFF);
-	t1cr->SetValue((t1 & 0x0040) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cw->SetValue((t1 & 0x0004) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cp->SetValue((t1 & 0x0008) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cl->SetValue((t1 & 0x0010) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cr->SetValue((t1 & 0x0020) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cz->SetValue((t1 & 0x0040) ? B_CONTROL_ON : B_CONTROL_OFF);
+	t1cs->SetValue((t1 & 0x0080) ? B_CONTROL_ON : B_CONTROL_OFF);
 }
 
 void BeKESAMainWindow::curdataFromTab1(void) {
@@ -149,13 +151,14 @@ void BeKESAMainWindow::curdataFromTab1(void) {
 	curdata->t1stanmiejsc = t1stanmiejsc->Text();
 	curdata->t1stanobszar = t1stanobszar->Text();
 	int t1zrodlo = 0;
-	if (t1cz->Value() == B_CONTROL_ON) t1zrodlo |= 0x0001;
+	if (t1ca->Value() == B_CONTROL_ON) t1zrodlo |= 0x0001;
 	if (t1ct->Value() == B_CONTROL_ON) t1zrodlo |= 0x0002;
-	if (t1cl->Value() == B_CONTROL_ON) t1zrodlo |= 0x0004;
-	if (t1cw->Value() == B_CONTROL_ON) t1zrodlo |= 0x0008;
-	if (t1ca->Value() == B_CONTROL_ON) t1zrodlo |= 0x0010;
-	if (t1cp->Value() == B_CONTROL_ON) t1zrodlo |= 0x0020;
-	if (t1cr->Value() == B_CONTROL_ON) t1zrodlo |= 0x0040;
+	if (t1cw->Value() == B_CONTROL_ON) t1zrodlo |= 0x0004;
+	if (t1cp->Value() == B_CONTROL_ON) t1zrodlo |= 0x0008;
+	if (t1cl->Value() == B_CONTROL_ON) t1zrodlo |= 0x0010;
+	if (t1cr->Value() == B_CONTROL_ON) t1zrodlo |= 0x0020;
+	if (t1cz->Value() == B_CONTROL_ON) t1zrodlo |= 0x0040;
+	if (t1cs->Value() == B_CONTROL_ON) t1zrodlo |= 0x0080;
 	curdata->t1zrodloinformacji = t1zrodlo;
 	updateTab1();
 }
