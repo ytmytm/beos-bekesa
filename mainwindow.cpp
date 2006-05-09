@@ -34,11 +34,15 @@
 #include <Menu.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
+#include <PrintJob.h>
 #include <ScrollView.h>
 #include <TabView.h>
 #include <stdio.h>
 
+#include "bekesaprint.h"
+
 const uint32 MENU_DEFMSG 	= 'M000';
+const uint32 MENU_PRINT		= 'M001';
 const uint32 BUT_NEW		= 'Bnew';
 const uint32 BUT_CLEAR		= 'Bclr';
 const uint32 BUT_RESTORE	= 'Bres';
@@ -71,6 +75,7 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	BRect(100, 100, 740, 580), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
 
 	// get memory for objects
+	printSettings = NULL;
 	idlist = NULL;
 	curdata = new kesadat();
 
@@ -95,6 +100,7 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	((SpLocaleApp*)be_app)->AddToFileMenu(menu,false,false,false);
 	menu->AddSeparatorItem();
 	menu->AddItem(new BMenuItem("Item", new BMessage(MENU_DEFMSG), 0, 0));
+	menu->AddItem(new BMenuItem("Drukuj kartę", new BMessage(MENU_PRINT), 'P', 0));	
 	menu->AddItem(new BMenuItem("Quit", new BMessage(B_QUIT_REQUESTED), 'Q'));
 	menuBar->AddItem(menu);
 
@@ -213,6 +219,10 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 			curdata->dirty = true;
 			updateTab5(Message);
 			break;
+		case MENU_PRINT:
+			if (CommitCurdata()) {
+				PrintCurdata();
+			}
 		case BUT_NEW:
 			if (CommitCurdata()) {
 				// clear curdata
@@ -562,6 +572,35 @@ void kesadat::clear(void) {
 	t6obserwacja = t6pole = t6nasycenie = t6koncen = t6pow = t6gestosc = 0;
 	t7zagrozenie = t7stale = t7przezco = 0;
 	t7dodatkowe = "";
+}
+
+//---------------------
+
+void BeKESAMainWindow::PrintCurdata(void) {
+	if (printSettings == NULL)
+		if (PageSetup(curdata->t1miejsc.String()) != B_OK)
+			return;
+	BeKESAPrint *print = new BeKESAPrint(curdata, printSettings);
+	printf("about to go\n");
+	print->Go();
+}
+
+status_t BeKESAMainWindow::PageSetup(const char *documentname) {
+	status_t result = B_OK;
+
+	BPrintJob printJob(documentname);
+
+	if (printSettings != NULL)
+		printJob.SetSettings(new BMessage(*printSettings));
+
+	result = printJob.ConfigPage();
+
+	if (result == B_NO_ERROR) {
+		delete printSettings;
+		printSettings = printJob.Settings();
+	}
+
+	return result;
 }
 
 //---------------------

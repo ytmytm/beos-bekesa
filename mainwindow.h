@@ -100,6 +100,9 @@ class kesadat {
 
 			// action
 			void ChangedSelection(int newid);
+			// menu
+			void PrintCurdata(void);
+			status_t PageSetup(const char *documentname);
 
 			// main view widgets
 			BMenuBar *menuBar;
@@ -144,6 +147,9 @@ class kesadat {
 			kesadat *curdata;	// must exist BEFORE tabs are created
 			int currentid;	// id of currently edited data, <0 -> INSERT >=0 -> UPDATE
 			int *idlist;	// ids of listView data
+
+			// printing
+			BMessage *printSettings;	// z pagesetup
 	};
 
 #endif
