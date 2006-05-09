@@ -17,18 +17,22 @@
 
 #include <stdio.h>
 
-BeKESAPrint::BeKESAPrint(kesadat *dat, BMessage *pSettings) :
+BeKESAPrint::BeKESAPrint(int id, sqlite *db, BMessage *pSettings) :
 	BView(BRect(0,0,100,100), "BeKESAPrint", B_FOLLOW_ALL, B_WILL_DRAW) {
-	data = dat;
-//	data = new kesadat;
-//	memcpy(data,dat,sizeof(kesadat));
-//	data->t1miejsc = "daupduap";
-printf("in kesaprint constr, %i\n",sizeof(kesadat));
+
+	if (id<0)
+		return;
+
+	dbData = db;
+	data = new kesadat();
+	data->dbData = db;
+	data->fetch(id);	
+
 	status_t result = B_OK;
 	printJob = new BPrintJob(data->t1miejsc.String());
 	printJob->SetSettings(new BMessage(*pSettings));
 // dla przyspieszenia preview, potem wlaczyc!!!
-//	result = printJob->ConfigJob();
+//XXX	result = printJob->ConfigJob();
 	// XXX return, ale jak błąd zgłosić? geterror lub sth?
 	if (result != B_OK)
 		return;
@@ -46,17 +50,16 @@ BeKESAPrint::~BeKESAPrint() {
 void BeKESAPrint::Go(void) {
 	// information from printJob
 	BRect pageRect = printJob->PrintableRect();	
-	int32 firstPage = printJob->FirstPage();
-	int32 lastPage = printJob->LastPage();
-	int32 pageCount = printJob->LastPage() - printJob->FirstPage() + 1;
+//	int32 firstPage = printJob->FirstPage();
+//	int32 lastPage = printJob->LastPage();
+//	int32 pageCount = printJob->LastPage() - printJob->FirstPage() + 1;
 	printf("rect:[%f,%f,%f,%f]\n",pageRect.left,pageRect.top,pageRect.right,pageRect.bottom);
-	printf("page1:%i,lastp:%i;pages:%i\n",firstPage,lastPage,pageCount);
+//	printf("page1:%i,lastp:%i;pages:%i\n",firstPage,lastPage,pageCount);
 	// calculate # of own pages (according to rect), clip lastpage against pages in document
 	// dla debugu:
 	// - przygotowac okno
 	// - w oknie view do rysowania, tam w Draw() wszystko wyrysowac
 	// - wyswietlic
-printf("(%f,%f)->(%f,%f)\n",pageRect.top,pageRect.left,pageRect.bottom,pageRect.right);
 	BRect r = pageRect;
 	r.OffsetBy(20,20);
 	pWindow = new BWindow(r, "Podgląd wydruku", B_TITLED_WINDOW, 0);
@@ -74,11 +77,14 @@ printf("go!\n");
 	printJob->CommitJob();
 }
 
+void BeKESAPrint::AttachedToWindow(void) {
+	printf("attached\n");
+}
+
 #define TOP		(pageRect.top+font.Size()+10)
 #define LEFT	(pageRect.left+10)
 
 void BeKESAPrint::Draw(BRect pageRect) {
-
 printf("indraw\n");
 	printf("(%f,%f)->(%f,%f)\n",pageRect.top,pageRect.left,pageRect.bottom,pageRect.right);
 

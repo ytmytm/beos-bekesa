@@ -423,6 +423,7 @@ int BeKESAMainWindow::OpenDatabase(void) {
 		return -1;
 	}
 	sqlite_exec(dbData, "VACUUM", 0, 0, &dbErrMsg);
+	curdata->dbData = dbData;
 	return 0;
 }
 
@@ -477,65 +478,7 @@ int BeKESAMainWindow::GenerateId(void) {
 
 void BeKESAMainWindow::FetchCurdata(int id) {
 //printf("in fetchcurdata with %i\n",id);
-	int i;
-	int nRows, nCols;
-	char **result;
-	BString sql;	
-	sql = "SELECT ";
-	sql += "t1miejscowosc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo, t1nrobszaru, t1nrinwentarza, t1x, t1y, t1nrstanmiejsc, t1nrstanobszar, t1zrodloinformacji"; // t1
-	sql += ", t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami";	// t2
-	sql += ", t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2, t2forma"; // t3
-	sql += ", t3zabudowa, t3rodzaj, t3okreslenie, t5gleba, t5kamienistosc, t5okreslenie"; // t4
-	sql += ", t6obserwacja, t6pole, t6nasycenie, t6koncen, t6pow, t6gestosc, t7zagrozenie, t7stale, t7przezco, t7dodatkowe"; // t5
-	sql += " FROM karta WHERE id = ";
-	sql << id;
-printf("sql:%s\n",sql.String());
-	sqlite_get_table(dbData, sql.String(), &result, &nRows, &nCols, &dbErrMsg);
-//printf ("got:%ix%i\n", nRows, nCols);
-	// readout data
-	i = nCols;
-	curdata->t1miejsc = result[i++];
-	curdata->t1nazwalokalna = result[i++];
-	curdata->t1gmina = result[i++];
-	curdata->t1powiat = result[i++];
-	curdata->t1wojewodztwo = result[i++];
-	curdata->t1nrobszaru = result[i++];
-	curdata->t1nrinwent = result[i++];
-	curdata->t1x = result[i++];
-	curdata->t1y = result[i++];
-	curdata->t1stanmiejsc = result[i++];
-	curdata->t1stanobszar = result[i++];
-	curdata->t1zrodloinformacji = toint(result[i++]);
-	curdata->t2nadmorska = toint(result[i++]);
-	curdata->t2duzedoliny = toint(result[i++]);
-	curdata->t2maledoliny = toint(result[i++]);
-	curdata->t2pozadolinami = toint(result[i++]);
-	curdata->t2ekswys = toint(result[i++]);
-	curdata->t2eksstop = toint(result[i++]);
-	curdata->t2ekskier = toint(result[i++]);
-	curdata->t2ekspozycja = toint(result[i++]);
-	curdata->t2ekspozycja2 = toint(result[i++]);
-	curdata->t2forma = result[i++];
-	curdata->t3zabudowa = toint(result[i++]);
-	curdata->t3rodzaj = toint(result[i++]);
-	curdata->t3okreslenie = result[i++];
-	curdata->t5gleba = toint(result[i++]);
-	curdata->t5kamienistosc = toint(result[i++]);
-	curdata->t5okreslenie = result[i++];
-	curdata->t6obserwacja = toint(result[i++]);
-	curdata->t6pole = toint(result[i++]);
-	curdata->t6nasycenie = toint(result[i++]);
-	curdata->t6koncen = toint(result[i++]);
-	curdata->t6pow = toint(result[i++]);
-	curdata->t6gestosc = toint(result[i++]);
-	curdata->t7zagrozenie = toint(result[i++]);
-	curdata->t7stale = toint(result[i++]);
-	curdata->t7przezco = toint(result[i++]);
-	curdata->t7dodatkowe = result[i++];
-
-	sqlite_free_table(result);
-	curdata->id = id;
-	curdata->dirty = false;
+	curdata->fetch(id);
 }
 
 //--------------------
@@ -574,15 +517,85 @@ void kesadat::clear(void) {
 	t7dodatkowe = "";
 }
 
+void kesadat::fetch(int nid) {
+	if (!dbData)
+		return;
+
+	int i;
+	int nRows, nCols;
+	char **result;
+	BString sql;	
+
+	sql = "SELECT ";
+	sql += "t1miejscowosc, t1nazwalokalna, t1gmina, t1powiat, t1wojewodztwo, t1nrobszaru, t1nrinwentarza, t1x, t1y, t1nrstanmiejsc, t1nrstanobszar, t1zrodloinformacji"; // t1
+	sql += ", t2nadmorska, t2duzedoliny, t2maledoliny, t2pozadolinami";	// t2
+	sql += ", t2ekswys, t2eksstop, t2ekskier, t2ekspozycja, t2ekspozycja2, t2forma"; // t3
+	sql += ", t3zabudowa, t3rodzaj, t3okreslenie, t5gleba, t5kamienistosc, t5okreslenie"; // t4
+	sql += ", t6obserwacja, t6pole, t6nasycenie, t6koncen, t6pow, t6gestosc, t7zagrozenie, t7stale, t7przezco, t7dodatkowe"; // t5
+	sql += " FROM karta WHERE id = ";
+	sql << nid;
+printf("sql:%s\n",sql.String());
+	sqlite_get_table(dbData, sql.String(), &result, &nRows, &nCols, &dbErrMsg);
+//printf ("got:%ix%i\n", nRows, nCols);
+	// readout data
+	i = nCols;
+	t1miejsc = result[i++];
+	t1nazwalokalna = result[i++];
+	t1gmina = result[i++];
+	t1powiat = result[i++];
+	t1wojewodztwo = result[i++];
+	t1nrobszaru = result[i++];
+	t1nrinwent = result[i++];
+	t1x = result[i++];
+	t1y = result[i++];
+	t1stanmiejsc = result[i++];
+	t1stanobszar = result[i++];
+	t1zrodloinformacji = toint(result[i++]);
+	t2nadmorska = toint(result[i++]);
+	t2duzedoliny = toint(result[i++]);
+	t2maledoliny = toint(result[i++]);
+	t2pozadolinami = toint(result[i++]);
+	t2ekswys = toint(result[i++]);
+	t2eksstop = toint(result[i++]);
+	t2ekskier = toint(result[i++]);
+	t2ekspozycja = toint(result[i++]);
+	t2ekspozycja2 = toint(result[i++]);
+	t2forma = result[i++];
+	t3zabudowa = toint(result[i++]);
+	t3rodzaj = toint(result[i++]);
+	t3okreslenie = result[i++];
+	t5gleba = toint(result[i++]);
+	t5kamienistosc = toint(result[i++]);
+	t5okreslenie = result[i++];
+	t6obserwacja = toint(result[i++]);
+	t6pole = toint(result[i++]);
+	t6nasycenie = toint(result[i++]);
+	t6koncen = toint(result[i++]);
+	t6pow = toint(result[i++]);
+	t6gestosc = toint(result[i++]);
+	t7zagrozenie = toint(result[i++]);
+	t7stale = toint(result[i++]);
+	t7przezco = toint(result[i++]);
+	t7dodatkowe = result[i++];
+
+	sqlite_free_table(result);
+	id = nid;
+	dirty = false;
+}
+
 //---------------------
 
 void BeKESAMainWindow::PrintCurdata(void) {
+	if (curdata->id < 0)
+		return;
+	BeKESAPrint *print;
 	if (printSettings == NULL)
 		if (PageSetup(curdata->t1miejsc.String()) != B_OK)
 			return;
-	BeKESAPrint *print = new BeKESAPrint(curdata, printSettings);
+	print = new BeKESAPrint(curdata->id, dbData, printSettings);
 	printf("about to go\n");
 	print->Go();
+	delete print;
 }
 
 status_t BeKESAMainWindow::PageSetup(const char *documentname) {

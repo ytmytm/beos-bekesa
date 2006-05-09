@@ -12,12 +12,17 @@ class BWindow;
 class BeKESAPrint : public BView {
 
 	public:
-		BeKESAPrint(kesadat *dat, BMessage *pSettings);
+		BeKESAPrint(int id, sqlite *db, BMessage *pSettings);
 		virtual ~BeKESAPrint();
 		void Go(void);
 		virtual void Draw(BRect updateRect);
+		virtual void AttachedToWindow(void);
 	private:
 		kesadat *data;
+
+		// database
+		sqlite *dbData;
+		char *dbErrMsg;
 
 		BWindow	*pWindow;
 		BPrintJob *printJob;

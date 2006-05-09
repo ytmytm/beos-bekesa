@@ -14,10 +14,12 @@ int toint(const char *input);
 #include <String.h>
 class kesadat {
 	public:
-	kesadat(void) { clear(); };
+	kesadat(void) { dbData = NULL; clear(); };
 	~kesadat() { };
 	void dump_all(void);
 	void clear(void);
+	//
+	void fetch(int nid);
 	// data holders
 	bool dirty;
 	int id;
@@ -35,6 +37,9 @@ class kesadat {
 	int t6obserwacja, t6pole, t6nasycenie, t6koncen, t6pow, t6gestosc;
 	int t7zagrozenie, t7stale, t7przezco;
 	BString t7dodatkowe;
+	// database
+	sqlite *dbData;
+	char *dbErrMsg;
 };
 
 	class BButton;
