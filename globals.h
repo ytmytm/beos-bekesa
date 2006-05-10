@@ -7,7 +7,7 @@
 	#define APP_SIGNATURE "application/x-vnd.generic-BeKESA"
 	extern int AppReturnValue;
 	// gettext-style translation helper
-	#define _(x) SpTranslate(x)
+	#define _(x) (x)
 	// Qt-style translation helper
-	#define tr(x) SpTranslate(x)
+	#define tr(x) (x)
 #endif

@@ -1,9 +1,8 @@
 
 #include "bekesa.h"
 #include "globals.h"
-#include <SpLocaleApp.h>
 
-BeKESAApp::BeKESAApp() : SpLocaleApp(APP_SIGNATURE) {
+BeKESAApp::BeKESAApp() : BApplication(APP_SIGNATURE) {
 	mainWindow = new BeKESAMainWindow(APP_NAME);
 	if (mainWindow != NULL) {
 		mainWindow->Show();

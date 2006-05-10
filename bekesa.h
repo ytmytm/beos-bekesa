@@ -2,11 +2,11 @@
 #ifndef _BEKESAAPP_H
 #define _BEKESAAPP_H
 
-#include <SpLocaleApp.h>
+#include <Application.h>
 
 #include "mainwindow.h"
 
-class BeKESAApp : public SpLocaleApp {
+class BeKESAApp : public BApplication {
 	public:
 		BeKESAApp();
 		~BeKESAApp();

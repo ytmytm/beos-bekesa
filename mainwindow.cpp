@@ -97,10 +97,9 @@ BeKESAMainWindow::BeKESAMainWindow(const char *windowTitle) : BWindow(
 	mainView->AddChild(menuBar);
 
 	menu = new BMenu("Plik", B_ITEMS_IN_COLUMN);
-	((SpLocaleApp*)be_app)->AddToFileMenu(menu,false,false,false);
-	menu->AddSeparatorItem();
 	menu->AddItem(new BMenuItem("Item", new BMessage(MENU_DEFMSG), 0, 0));
 	menu->AddItem(new BMenuItem("Drukuj kartę", new BMessage(MENU_PRINT), 'P', 0));	
+	menu->AddSeparatorItem();
 	menu->AddItem(new BMenuItem("Quit", new BMessage(B_QUIT_REQUESTED), 'Q'));
 	menuBar->AddItem(menu);
 
