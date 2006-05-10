@@ -222,6 +222,7 @@ void BeKESAMainWindow::MessageReceived(BMessage *Message) {
 			if (CommitCurdata()) {
 				PrintCurdata();
 			}
+			break;
 		case BUT_NEW:
 			if (CommitCurdata()) {
 				// clear curdata
@@ -591,6 +592,17 @@ void BeKESAMainWindow::PrintCurdata(void) {
 	if (printSettings == NULL)
 		if (PageSetup(curdata->t1miejsc.String()) != B_OK)
 			return;
+
+//	if (printSettings != NULL) {
+//		// fixing???
+//		// set for landscape, A4
+//		// orientation = 1
+//		BRect page(0,0,595,842);
+//		printSettings->ReplaceRect("printable_rect",page);
+//		printSettings->ReplaceRect("paper_rect",page);
+//		printSettings->ReplaceInt32("orientation",1);
+//	}
+
 	print = new BeKESAPrint(curdata->id, dbData, printSettings);
 	printf("about to go\n");
 	print->Go();
