@@ -80,22 +80,23 @@ void BeKESAPrint::Go(void) {
 
 void BeKESAPrint::Draw(BRect pageRect) {
 printf("indraw\n");
-	printf("(%f,%f)->(%f,%f)\n",pageRect.top,pageRect.left,pageRect.bottom,pageRect.right);
+//	printf("(%f,%f)->(%f,%f)\n",pageRect.top,pageRect.left,pageRect.bottom,pageRect.right);
 
-	BFont font(be_plain_font);
-	font.SetFamilyAndStyle("Arial","Regular");
-	font.SetFlags(B_DISABLE_ANTIALIASING);
-	BFont fontb(be_bold_font);
-	fontb.SetFamilyAndStyle("Arial","Bold");
-	fontb.SetFlags(B_DISABLE_ANTIALIASING);
-	font.SetSize(10.0);
-	fontb.SetSize(10.0);
+//	BFont font(be_plain_font);
+//	font.SetFamilyAndStyle("Arial","Regular");
+//	font.SetFlags(B_DISABLE_ANTIALIASING);
+//	BFont fontb(be_bold_font);
+//	fontb.SetFamilyAndStyle("Arial","Bold");
+//	fontb.SetFlags(B_DISABLE_ANTIALIASING);
+//	font.SetSize(10.0);
+//	fontb.SetSize(10.0);
 
-	SetFont(&font);
-	MovePenTo(LEFT, TOP);
-	DrawString("hello, world! drugalinia trzecialinia czwartalinia");
+//	SetFont(&font);
+//	MovePenTo(LEFT, TOP);
+//	DrawString("hello, world! drugalinia trzecialinia czwartalinia");
 
 	DrawWires(pageRect);
+	DrawValues(pageRect);
 }
 
 #define MM(x) (2.84*(x))
@@ -139,4 +140,104 @@ void BeKESAPrint::DrawWires(BRect r) {
 	MovePenTo(frame.left+MM(35),frame.top+MM(8));
 	fontb.SetSize(MM(5.75)); SetFont(&fontb);
 	DrawString("KARTA EWIDENCJI STANOWISKA ARCHEOLOGICZNEGO");
+	// box1
+	BRect rbox1;
+	rbox1.left = frame.left; rbox1.right = frame.left + MM(68);
+	rbox1.top = frame.top + MM(10); rbox1.bottom = rbox1.top + MM(65);
+	StrokeLine(rbox1.LeftBottom(),rbox1.RightBottom());
+	StrokeLine(rbox1.RightTop(),rbox1.RightBottom());
+	// box1 lines
+	{
+	BRect line(rbox1);
+	line.top = line.top + MM(5); line.bottom = line.top;
+	font.SetSize(MM(3.5)); SetFont(&font);
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("1");
+	MovePenTo(line.left+MM(14),line.top-MM(1));
+	DrawString("LOKALIZACJA");
+	line.OffsetBy(0,MM(5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("M.");
+	line.OffsetBy(0,MM(5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("Nazwa lokalna");
+	line.OffsetBy(0,MM(5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("GM.");
+	line.OffsetBy(0,MM(5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("POW.");
+	line.OffsetBy(0,MM(5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("WOJ.");
+	font.SetSize(MM(4)); SetFont(&font);
+	BRect line2(line);
+	line2.left = line2.right - MM(23);
+	line2.bottom = rbox1.bottom;
+	StrokeLine(line2.LeftTop(),line2.LeftBottom());
+	line.OffsetBy(0,MM(7));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("NR OBSZARU");
+	font.SetSize(MM(2)); SetFont(&font);
+	line.OffsetBy(0,MM(5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("nr stanowiska w miejscowości");
+	line.OffsetBy(0,MM(5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("nr stanowiska na obszarze");
+	line.OffsetBy(0,MM(10));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(4));
+	DrawString("współrzędne");
+	MovePenTo(line2.left+MM(2),line.top-MM(6));
+	DrawString("x-");
+	MovePenTo(line2.left+MM(2),line.top-MM(1));
+	DrawString("y-");
+	StrokeLine(BPoint(line2.left,line.top-MM(5)),BPoint(line2.right,line.top-MM(5)));
+	line.top = rbox1.bottom; line.bottom = line.top;
+	MovePenTo(line.left+MM(3),line.top-MM(4));
+	DrawString("nr inwentarza");
+	}
+}
+
+void BeKESAPrint::DrawValues(BRect r) {
+	BFont font(be_plain_font);
+	font.SetFamilyAndStyle("Arial","Regular");
+	font.SetFlags(B_DISABLE_ANTIALIASING);
+	BFont fontb(be_bold_font);
+	fontb.SetFamilyAndStyle("Arial","Bold");
+	fontb.SetFlags(B_DISABLE_ANTIALIASING);
+	font.SetSize(10.0);
+	fontb.SetSize(10.0);
+
+	BRect frame(r.left+MM(10),r.top+MM(7),r.right-MM(17),r.bottom-MM(9));
+	// XXX wstawic 'X' w ATWPLRZS
+	// box1
+	BRect rbox1;
+	rbox1.left = frame.left; rbox1.right = frame.left + MM(68);
+	rbox1.top = frame.top + MM(10); rbox1.bottom = rbox1.top + MM(65);
+	{
+	font.SetSize(MM(3.5)); SetFont(&font);
+	MovePenTo(rbox1.left+MM(15),rbox1.top+MM(5)+MM(4));
+	DrawString(data->t1miejsc.String());
+	MovePenTo(rbox1.left+MM(30),rbox1.top+MM(10)+MM(4));
+	DrawString(data->t1nazwalokalna.String());
+	MovePenTo(rbox1.left+MM(20),rbox1.top+MM(15)+MM(4));
+	DrawString(data->t1gmina.String());
+	MovePenTo(rbox1.left+MM(20),rbox1.top+MM(20)+MM(4));
+	DrawString(data->t1powiat.String());
+	MovePenTo(rbox1.left+MM(20),rbox1.top+MM(25)+MM(4));
+	DrawString(data->t1wojewodztwo.String());
+	// XXX dokończyć!
+	}
+	
 }

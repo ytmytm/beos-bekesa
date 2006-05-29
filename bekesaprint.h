@@ -18,6 +18,7 @@ class BeKESAPrint : public BView {
 		virtual void Draw(BRect updateRect);
 	private:
 		void DrawWires(BRect r);
+		void DrawValues(BRect r);
 
 		kesadat *data;
 
