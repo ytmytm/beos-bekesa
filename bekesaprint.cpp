@@ -207,6 +207,61 @@ void BeKESAPrint::DrawWires(BRect r) {
 	MovePenTo(line.left+MM(3),line.top-MM(4));
 	DrawString("nr inwentarza");
 	}
+	// box3
+	BRect rbox3;
+	rbox3.left = rbox1.left; rbox3.right = rbox1.right;
+	rbox3.top = rbox1.bottom; rbox3.bottom = rbox3.top + MM(60);
+	StrokeLine(rbox3.LeftBottom(),rbox3.RightBottom());
+	StrokeLine(rbox3.RightTop(),rbox3.RightBottom());
+	{
+	// box3 lines
+	BRect line(rbox3);
+	line.top = line.top + MM(5); line.bottom = line.top;
+	font.SetSize(MM(3.5)); SetFont(&font);
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(3),line.top-MM(1));
+	DrawString("3");
+	MovePenTo(line.left+MM(14),line.top-MM(1));
+	DrawString("DOSTĘPNOŚĆ TERENU");
+	line.OffsetBy(0,MM(8.5));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	font.SetSize(MM(2)); SetFont(&font);
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("niezabudowany/średniozabudowany/zabudowany");
+	line.OffsetBy(0,MM(7));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("las  /  sad  /  park");
+	line.OffsetBy(0,MM(7));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("pole orne  /  łąka");
+	line.OffsetBy(0,MM(7));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("teren rolniczy: prywatny/społeczny");
+	line.OffsetBy(0,MM(7));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("teren przemysłowy");
+	line.OffsetBy(0,MM(6));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("Nr działki:");
+	line.OffsetBy(0,MM(6));
+	StrokeLine(line.LeftTop(),line.RightBottom());
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("Obręb:");
+	line.OffsetBy(0,MM(6));
+	MovePenTo(line.left+MM(2),line.top-MM(1));
+	DrawString("Okr. blizsze:");	// XXX 'ż!'
+	// box3 strokes
+	BRect line2(line);
+	line2.left = line2.right - MM(21);
+	line2.top = rbox3.top+MM(5); line2.bottom = line2.top+MM(8.5)+MM(4*7);
+	StrokeLine(line2.LeftTop(),line2.LeftBottom());
+	// XXX finish this
+	}
 }
 
 void BeKESAPrint::DrawValues(BRect r) {
@@ -221,6 +276,7 @@ void BeKESAPrint::DrawValues(BRect r) {
 
 	BRect frame(r.left+MM(10),r.top+MM(7),r.right-MM(17),r.bottom-MM(9));
 	// XXX wstawic 'X' w ATWPLRZS
+	// XXX osobna funkcja do centrowanych "X" w boksach
 	// box1
 	BRect rbox1;
 	rbox1.left = frame.left; rbox1.right = frame.left + MM(68);
@@ -237,7 +293,18 @@ void BeKESAPrint::DrawValues(BRect r) {
 	DrawString(data->t1powiat.String());
 	MovePenTo(rbox1.left+MM(20),rbox1.top+MM(25)+MM(4));
 	DrawString(data->t1wojewodztwo.String());
-	// XXX dokończyć!
+	MovePenTo(rbox1.right-MM(23)+MM(2),rbox1.top+MM(32)+MM(4));
+	DrawString(data->t1nrobszaru.String());
+	MovePenTo(rbox1.right-MM(23)+MM(2),rbox1.top+MM(37)+MM(4));
+	DrawString(data->t1stanmiejsc.String());
+	MovePenTo(rbox1.right-MM(23)+MM(2),rbox1.top+MM(42)+MM(4));
+	DrawString(data->t1stanobszar.String());
+	MovePenTo(rbox1.right-MM(23)+MM(5),rbox1.top+MM(47)+MM(4));
+	DrawString(data->t1x.String());
+	MovePenTo(rbox1.right-MM(23)+MM(5),rbox1.top+MM(52)+MM(4));
+	DrawString(data->t1y.String());
+	MovePenTo(rbox1.right-MM(23)+MM(2),rbox1.top+MM(57)+MM(4));
+	DrawString(data->t1nrinwent.String());
 	}
 	
 }
