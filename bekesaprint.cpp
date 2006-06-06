@@ -258,9 +258,20 @@ void BeKESAPrint::DrawWires(BRect r) {
 	// box3 strokes
 	BRect line2(line);
 	line2.left = line2.right - MM(21);
-	line2.top = rbox3.top+MM(5); line2.bottom = line2.top+MM(8.5)+MM(4*7);
+	line2.top = rbox3.top+MM(5); line2.bottom = line2.top+MM(8.5+4*7);
 	StrokeLine(line2.LeftTop(),line2.LeftBottom());
-	// XXX finish this
+	BRect line3;
+	line3.top = line2.bottom; line3.bottom = rbox3.bottom;
+	line3.left = rbox3.left+MM(22);
+	StrokeLine(line3.LeftTop(),line3.LeftBottom());
+	line3.top = rbox3.top+MM(5); line3.bottom = line3.top+MM(8.5+7);
+	line3.left = rbox3.right-MM(7);
+	StrokeLine(line3.LeftTop(),line3.LeftBottom());
+	line3.OffsetBy(-MM(7),0);
+	StrokeLine(line3.LeftTop(),line3.LeftBottom());
+	line3.top = line3.bottom; line3.bottom += MM(2*7);
+	line3.left = rbox3.right-MM(10.5);
+	StrokeLine(line3.LeftTop(),line3.LeftBottom());
 	}
 }
 
@@ -275,8 +286,21 @@ void BeKESAPrint::DrawValues(BRect r) {
 	fontb.SetSize(10.0);
 
 	BRect frame(r.left+MM(10),r.top+MM(7),r.right-MM(17),r.bottom-MM(9));
-	// XXX wstawic 'X' w ATWPLRZS
-	// XXX osobna funkcja do centrowanych "X" w boksach
+	// ATW...
+	{
+	BRect r0;
+	r0.left = frame.right-MM(70)+MM(3.5);
+	r0.top = frame.top+MM(5)+MM(4.5);
+	font.SetSize(MM(3.5)); SetFont(&font);
+	int j=data->t1zrodloinformacji;
+	for (int i=0;i<8;i++) {
+		if (j & 0x01) {
+			MovePenTo(r0.left,r0.top); DrawString("X");
+		}
+		j = j >> 1;
+		r0.OffsetBy(MM(8.75),0);
+	}
+	}
 	// box1
 	BRect rbox1;
 	rbox1.left = frame.left; rbox1.right = frame.left + MM(68);
@@ -306,5 +330,51 @@ void BeKESAPrint::DrawValues(BRect r) {
 	MovePenTo(rbox1.right-MM(23)+MM(2),rbox1.top+MM(57)+MM(4));
 	DrawString(data->t1nrinwent.String());
 	}
-	
+	// box3
+	BRect rbox3;
+	rbox3.left = rbox1.left; rbox3.right = rbox1.right;
+	rbox3.top = rbox1.bottom; rbox3.bottom = rbox3.top + MM(60);
+	{
+	if (data->t3zabudowa>0) {
+		MovePenTo(rbox3.right-MM(21)+MM(3)+MM((data->t3zabudowa-1)*7),rbox3.top+MM(5)+MM(6));
+		DrawString("X");
+	}
+	if (data->t3rodzaj>0) {
+		if (data->t3rodzaj & 0x0001) {
+			MovePenTo(rbox3.right-MM(21)+MM(3), rbox3.top+MM(5)+MM(8.5)+MM(5));
+			DrawString("X");
+		}
+		if (data->t3rodzaj & 0x0002) {
+			MovePenTo(rbox3.right-MM(21)+MM(3)+MM(7), rbox3.top+MM(5)+MM(8.5)+MM(5));
+			DrawString("X");
+		}
+		if (data->t3rodzaj & 0x0004) {
+			MovePenTo(rbox3.right-MM(21)+MM(3)+MM(14), rbox3.top+MM(5)+MM(8.5)+MM(5));
+			DrawString("X");
+		}
+		if (data->t3rodzaj & 0x0008) {
+			MovePenTo(rbox3.right-MM(21)+MM(5), rbox3.top+MM(5)+MM(8.5+7)+MM(5));
+			DrawString("X");
+		}
+		if (data->t3rodzaj & 0x0010) {
+			MovePenTo(rbox3.right-MM(21)+MM(5)+MM(10.5), rbox3.top+MM(5)+MM(8.5+7)+MM(5));
+			DrawString("X");
+		}
+		if (data->t3rodzaj & 0x0020) {
+			MovePenTo(rbox3.right-MM(21)+MM(5), rbox3.top+MM(5)+MM(8.5+14)+MM(5));
+			DrawString("X");
+		}
+		if (data->t3rodzaj & 0x0040) {
+			MovePenTo(rbox3.right-MM(21)+MM(5)+MM(10.5), rbox3.top+MM(5)+MM(8.5+14)+MM(5));
+			DrawString("X");
+		}
+		if (data->t3rodzaj & 0x0080) {
+			MovePenTo(rbox3.right-MM(21)+MM(3)+MM(7), rbox3.top+MM(5)+MM(8.5+21)+MM(5));
+			DrawString("X");
+		}
+	}
+	MovePenTo(rbox3.left+MM(22+1),rbox3.bottom-MM(1));	// XXX ew. textview
+	font.SetSize(MM(2)); SetFont(&font);
+	DrawString(data->t3okreslenie.String());
+	}
 }
